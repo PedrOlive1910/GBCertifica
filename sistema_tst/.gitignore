@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.env
+.venv/
+venv/
+instance/
+storage/documentos/*
+!storage/documentos/.gitkeep
+migrations/__pycache__/
+.pytest_cache/
+.coverage

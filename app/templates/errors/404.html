@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Página não encontrada | Sistema TST{% endblock %}
+
+{% block content %}
+<section class="panel error-page">
+    <h1>404</h1>
+    <p>A página solicitada não foi encontrada.</p>
+    <a class="button" href="{{ url_for('main.dashboard') }}">Voltar ao Dashboard</a>
+</section>
+{% endblock %}

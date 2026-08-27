@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhes da Emissão | Sistema TST{% endblock %}
+
+{% block content %}
+<section class="page-header page-header-actions"><div><span class="eyebrow">Emissão</span><h1>{{ emissao.funcionario_snapshot.get('nome') }}</h1><p>{{ emissao.empresa_snapshot.get('razao_social') }} · criada em {{ emissao.criado_em | data_br }}</p></div><span class="badge badge-large status-{{ emissao.status | lower }}">{{ rotulos_status_emissao.get(emissao.status, emissao.status) }}</span></section>
+
+<section class="detail-grid">
+    <article class="panel"><h2>Dados da emissão</h2><dl class="detail-list"><div><dt>CPF</dt><dd>{{ emissao.funcionario_snapshot.get('cpf') | cpf }}</dd></div><div><dt>Função</dt><dd>{{ emissao.funcionario_snapshot.get('funcao') }}</dd></div><div><dt>Data inicial</dt><dd>{{ emissao.data_inicial | data_br }}</dd></div><div><dt>Admissão</dt><dd>{{ emissao.dados_gerais.get('data_admissao_formatada', '—') }}</dd></div></dl></article>
+    <article class="panel"><h2>{{ 'Ações' if current_user.is_authenticated and current_user.pode_editar else 'Permissão' }}</h2>{% if current_user.is_authenticated and current_user.pode_editar %}<div class="action-stack">
+        {% if emissao.status in ['RASCUNHO', 'ERRO'] %}<a class="button button-secondary" href="{{ url_for('emissoes.editar', emissao_id=emissao.id) }}">Editar dados</a>{% endif %}
+        {% if emissao.status != 'PROCESSANDO' %}<form method="post" action="{{ url_for('emissoes.gerar', emissao_id=emissao.id) }}">{{ acao_form.hidden_tag() }}<button class="button" type="submit">{{ 'Gerar novamente' if emissao.status == 'CONCLUIDA' else 'Gerar documentos' }}</button></form>{% endif %}
+        {% if emissao.status not in ['CANCELADA', 'PROCESSANDO'] %}<form method="post" action="{{ url_for('emissoes.cancelar', emissao_id=emissao.id) }}">{{ acao_form.hidden_tag() }}<button class="button button-danger" type="submit">Cancelar emissão</button></form>{% endif %}
+        {% if emissao.status in ['RASCUNHO', 'CANCELADA'] %}<form method="post" action="{{ url_for('emissoes.excluir', emissao_id=emissao.id) }}" data-confirm="Excluir esta emissão?">{{ acao_form.hidden_tag() }}<button class="button button-danger" type="submit">Excluir rascunho</button></form>{% endif %}
+    </div>{% else %}<div class="empty-inline">Perfil de consulta: os dados e arquivos podem ser visualizados, mas não alterados.</div>{% endif %}</article>
+</section>
+
+<section class="documents-list">
+    {% for documento in emissao.documentos %}
+        <article class="panel document-card"><div class="document-card-head"><div><span class="document-index">{{ '%02d' | format(documento.sequencia) }}</span><h2>{{ documento.titulo }}</h2><p>Data: {{ documento.data_documento | data_br }}</p></div><span class="badge status-{{ documento.status | lower }}">{{ documento.status | title }}</span></div>
+            {% if documento.erro_processamento %}<div class="alert alert-error">{{ documento.erro_processamento }}</div>{% endif %}
+            {% if documento.arquivos %}<div class="file-grid">
+                {% for arquivo in documento.arquivos %}
+                    <a class="file-link" href="{{ url_for('emissoes.baixar_arquivo', arquivo_id=arquivo.id) }}"><span class="file-format">{{ arquivo.formato }}{% if arquivo.pagina %} {{ arquivo.pagina }}{% endif %}</span><span>{{ arquivo.nome_arquivo }}</span><small>{{ (arquivo.tamanho_bytes / 1024) | round(1) }} KB</small></a>
+                {% endfor %}
+            </div>
+            {% set pdf = documento.arquivos | selectattr('formato', 'equalto', 'PDF') | first %}{% if pdf %}<a class="preview-link" target="_blank" href="{{ url_for('emissoes.baixar_arquivo', arquivo_id=pdf.id, preview=1) }}">Visualizar PDF em nova aba →</a>{% endif %}
+            {% else %}<div class="empty-inline">Os arquivos ainda não foram gerados.</div>{% endif %}
+        </article>
+    {% endfor %}
+</section>
+{% endblock %}

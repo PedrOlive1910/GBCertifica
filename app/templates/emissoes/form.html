@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} | Sistema TST{% endblock %}
+
+{% macro field_errors(field) %}{% for erro in field.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}{% endmacro %}
+
+{% block content %}
+<section class="page-header"><span class="eyebrow">Emissão de documentos</span><h1>{{ titulo }}</h1><p>Selecione o funcionário, os modelos e preencha somente os blocos necessários.</p></section>
+
+{% if erros_especificos %}<div class="alert alert-error"><strong>Revise os dados:</strong><ul>{% for erro in erros_especificos %}<li>{{ erro }}</li>{% endfor %}</ul></div>{% endif %}
+
+<form method="post" novalidate id="emissaoForm">
+    {{ form.hidden_tag() }}
+    <section class="panel form-section">
+        <div class="section-title"><span class="step-number">1</span><div><h2>Empresa e funcionário</h2><p>Dados reutilizados em todos os documentos.</p></div></div>
+        <div class="form-grid">
+            <div class="field"><label for="empresa_id">Empresa</label><select id="empresa_id" name="empresa_id" class="{{ 'input-error' if form.empresa_id.errors else '' }}">{% for empresa in empresas %}<option value="{{ empresa.id }}" {{ 'selected' if form.empresa_id.data == empresa.id else '' }}>{{ empresa.razao_social }}</option>{% endfor %}</select>{{ field_errors(form.empresa_id) }}</div>
+            <div class="field"><label for="funcionario_id">Funcionário</label><select id="funcionario_id" name="funcionario_id" class="{{ 'input-error' if form.funcionario_id.errors else '' }}">{% for funcionario in funcionarios %}<option value="{{ funcionario.id }}" data-empresa="{{ funcionario.empresa_id }}" data-funcao="{{ funcionario.funcao or '' }}" {{ 'selected' if form.funcionario_id.data == funcionario.id else '' }}>{{ funcionario.nome }}</option>{% endfor %}</select>{{ field_errors(form.funcionario_id) }}</div>
+            <div class="field">{{ form.funcao.label }}{{ form.funcao(class_='input-error' if form.funcao.errors else '', placeholder='Ex.: Carpinteiro') }}{{ field_errors(form.funcao) }}</div>
+            <div class="field">{{ form.data_admissao.label }}{{ form.data_admissao(class_='input-error' if form.data_admissao.errors else '') }}{{ field_errors(form.data_admissao) }}</div>
+            <div class="field">{{ form.data_inicial.label }}{{ form.data_inicial(class_='input-error' if form.data_inicial.errors else '') }}<small class="field-help">Domingos são ignorados automaticamente.</small>{{ field_errors(form.data_inicial) }}</div>
+            <div class="field">{{ form.observacoes.label }}{{ form.observacoes(rows=3, placeholder='Opcional') }}{{ field_errors(form.observacoes) }}</div>
+        </div>
+    </section>
+
+    <section class="panel form-section">
+        <div class="section-title"><span class="step-number">2</span><div><h2>Documentos</h2><p>Marque tudo o que será gerado nesta emissão.</p></div></div>
+        <div class="document-grid">
+            {% for tipo, rotulo in rotulos_documentos.items() %}
+                <label class="document-option"><input type="checkbox" name="documentos" value="{{ tipo }}" data-doc="{{ tipo }}" {{ 'checked' if tipo in tipos_selecionados else '' }}><span class="checkmark">✓</span><span><strong>{{ rotulo }}</strong><small>DOCX, PDF e JPEG</small></span></label>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="panel form-section conditional-section" data-section="FICHA_EPI">
+        <div class="section-title"><span class="step-number">3</span><div><h2>Ficha de EPI</h2><p>Adicione ou remova linhas conforme a entrega realizada.</p></div></div>
+        <div class="dynamic-table-wrap"><table class="dynamic-table" id="epiTable"><thead><tr><th>Qtd.</th><th>Descrição do EPI</th><th>CA</th><th>Entrega</th><th>Devolução</th><th>Assinatura</th><th></th></tr></thead><tbody>
+            {% for epi in (epis if epis else [{}]) %}<tr><td><input name="epi_quantidade[]" value="{{ epi.get('quantidade', '') }}" placeholder="01"></td><td><input name="epi_descricao[]" value="{{ epi.get('descricao', '') }}" placeholder="Capacete de segurança"></td><td><input name="epi_ca[]" value="{{ epi.get('ca', '') }}" placeholder="12345"></td><td><input name="epi_data_entrega[]" value="{{ epi.get('data_entrega', '') }}" type="date"></td><td><input name="epi_data_devolucao[]" value="{{ epi.get('data_devolucao', '') }}" type="date"></td><td><input name="epi_assinatura[]" value="{{ epi.get('assinatura', 'X') }}" placeholder="X"></td><td><button class="icon-button remove-row" type="button" aria-label="Remover linha">×</button></td></tr>{% endfor %}
+        </tbody></table></div>
+        <button class="button button-secondary button-small" type="button" id="addEpi">+ Adicionar EPI</button>
+    </section>
+
+    <section class="panel form-section conditional-section" data-section="NR_12">
+        <div class="section-title"><span class="step-number">3</span><div><h2>Máquinas e equipamentos da NR-12</h2><p>Os itens serão organizados automaticamente no certificado.</p></div></div>
+        <div id="maquinasList" class="repeater-list">{% for maquina in (maquinas if maquinas else ['']) %}<div class="repeater-row"><input name="maquinas[]" value="{{ maquina }}" placeholder="Ex.: Serra circular"><button class="icon-button remove-machine" type="button" aria-label="Remover máquina">×</button></div>{% endfor %}</div>
+        <button class="button button-secondary button-small" type="button" id="addMaquina">+ Adicionar máquina</button>
+    </section>
+
+    <section class="panel form-section conditional-section" data-section="ORDEM_SERVICO">
+        <div class="section-title"><span class="step-number">3</span><div><h2>Ordem de Serviço</h2><p>Campos técnicos específicos da atividade.</p></div></div>
+        <div class="form-grid">
+            <div class="field">{{ form.setor.label }}{{ form.setor(placeholder='Ex.: Obra') }}</div><div class="field">{{ form.cbo.label }}{{ form.cbo(placeholder='Ex.: 7153-15') }}</div>
+            <div class="field field-full">{{ form.descricao_funcao.label }}{{ form.descricao_funcao(rows=4, placeholder='Descreva as atividades executadas') }}</div>
+            <div class="field">{{ form.risco_fisico.label }}{{ form.risco_fisico(rows=3) }}</div><div class="field">{{ form.risco_quimico.label }}{{ form.risco_quimico(rows=3) }}</div>
+            <div class="field">{{ form.risco_biologico.label }}{{ form.risco_biologico(rows=3) }}</div><div class="field">{{ form.risco_ergonomico.label }}{{ form.risco_ergonomico(rows=3) }}</div>
+            <div class="field field-full">{{ form.risco_acidentes.label }}{{ form.risco_acidentes(rows=3) }}</div>
+            <div class="field field-full">{{ form.epis_atividade.label }}{{ form.epis_atividade(rows=4, placeholder='Liste os EPIs usados na atividade') }}</div>
+            <div class="field field-full">{{ form.recomendacoes.label }}{{ form.recomendacoes(rows=4) }}</div>
+            <div class="field field-full">{{ form.procedimentos_acidente.label }}{{ form.procedimentos_acidente(rows=4) }}</div>
+            <div class="field">{{ form.responsavel_nome.label }}{{ form.responsavel_nome(placeholder='Nome completo') }}</div><div class="field">{{ form.responsavel_cargo.label }}{{ form.responsavel_cargo(placeholder='Técnico de Segurança do Trabalho') }}</div>
+            <div class="field">{{ form.responsavel_registro.label }}{{ form.responsavel_registro(placeholder='Ex.: 0018863/PE') }}</div>
+        </div>
+    </section>
+
+    <div class="sticky-actions"><a class="button button-secondary" href="{{ url_for('emissoes.detalhar', emissao_id=emissao.id) if emissao else url_for('emissoes.listar') }}">Cancelar</a>{{ form.submit(class_='button', value=texto_botao) }}</div>
+</form>
+
+<template id="epiRowTemplate"><tr><td><input name="epi_quantidade[]" placeholder="01"></td><td><input name="epi_descricao[]" placeholder="Capacete de segurança"></td><td><input name="epi_ca[]" placeholder="12345"></td><td><input name="epi_data_entrega[]" type="date"></td><td><input name="epi_data_devolucao[]" type="date"></td><td><input name="epi_assinatura[]" value="X"></td><td><button class="icon-button remove-row" type="button">×</button></td></tr></template>
+<template id="maquinaTemplate"><div class="repeater-row"><input name="maquinas[]" placeholder="Ex.: Serra circular"><button class="icon-button remove-machine" type="button">×</button></div></template>
+{% endblock %}
+
+{% block scripts %}<script src="{{ url_for('static', filename='js/emissoes.js') }}"></script>{% endblock %}

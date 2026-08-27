@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Erro interno | Sistema TST{% endblock %}
+
+{% block content %}
+<section class="panel error-page">
+    <h1>Erro interno</h1>
+    <p>Não foi possível concluir a solicitação. Tente novamente.</p>
+    <a class="button" href="{{ url_for('main.dashboard') }}">Voltar ao Dashboard</a>
+</section>
+{% endblock %}

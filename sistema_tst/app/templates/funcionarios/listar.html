@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Funcionários | Sistema TST{% endblock %}
+
+{% block content %}
+<section class="page-header page-header-actions">
+    <div>
+        <span class="eyebrow">Cadastros</span>
+        <h1>Funcionários</h1>
+        <p>Gerencie os colaboradores vinculados às empresas.</p>
+    </div>
+    <a class="button" href="{{ url_for('funcionarios.novo') }}">+ Novo Funcionário</a>
+</section>
+
+<section class="panel filter-panel">
+    <form class="filter-form" method="get">
+        <div class="field field-grow">
+            <label for="busca">Buscar</label>
+            <input id="busca" name="busca" type="search" value="{{ busca }}"
+                   placeholder="Nome ou CPF">
+        </div>
+        <div class="field">
+            <label for="empresa_id">Empresa</label>
+            <select id="empresa_id" name="empresa_id">
+                <option value="">Todas</option>
+                {% for empresa in empresas %}
+                    <option value="{{ empresa.id }}" {{ 'selected' if empresa_id == empresa.id else '' }}>
+                        {{ empresa.razao_social }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="ativos" {{ 'selected' if status == 'ativos' else '' }}>Ativos</option>
+                <option value="inativos" {{ 'selected' if status == 'inativos' else '' }}>Inativos</option>
+                <option value="todos" {{ 'selected' if status == 'todos' else '' }}>Todos</option>
+            </select>
+        </div>
+        <div class="filter-actions">
+            <button class="button" type="submit">Filtrar</button>
+            <a class="button button-secondary" href="{{ url_for('funcionarios.listar') }}">Limpar</a>
+        </div>
+    </form>
+</section>
+
+<section class="panel table-panel">
+    <div class="table-summary"><strong>{{ paginacao.total }}</strong> registro(s)</div>
+    {% if funcionarios %}
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Funcionário</th><th>CPF</th><th>Empresa</th><th>Função</th><th>Status</th><th class="text-right">Ações</th></tr></thead>
+                <tbody>
+                {% for funcionario in funcionarios %}
+                    <tr>
+                        <td><strong>{{ funcionario.nome }}</strong></td>
+                        <td>{{ funcionario.cpf | cpf }}</td>
+                        <td>{{ funcionario.empresa.razao_social }}</td>
+                        <td>{{ funcionario.funcao or '—' }}</td>
+                        <td><span class="badge {{ 'badge-success' if funcionario.ativo else 'badge-muted' }}">{{ 'Ativo' if funcionario.ativo else 'Inativo' }}</span></td>
+                        <td><div class="row-actions">
+                            <a class="button button-small button-secondary" href="{{ url_for('funcionarios.editar', funcionario_id=funcionario.id) }}">Editar</a>
+                            <form method="post" action="{{ url_for('funcionarios.alterar_status', funcionario_id=funcionario.id) }}">
+                                {{ status_form.hidden_tag() }}
+                                <button class="button button-small {{ 'button-danger' if funcionario.ativo else 'button-success' }}" type="submit">{{ 'Desativar' if funcionario.ativo else 'Ativar' }}</button>
+                            </form>
+                        </div></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if paginacao.pages > 1 %}
+            <nav class="pagination" aria-label="Paginação">
+                {% for numero in paginacao.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if numero %}<a class="{{ 'active' if numero == paginacao.page else '' }}" href="{{ url_for('funcionarios.listar', pagina=numero, busca=busca, empresa_id=empresa_id, status=status) }}">{{ numero }}</a>{% else %}<span>…</span>{% endif %}
+                {% endfor %}
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="empty-state"><h2>Nenhum funcionário encontrado</h2><p>Cadastre o primeiro colaborador ou ajuste os filtros.</p><a class="button" href="{{ url_for('funcionarios.novo') }}">Cadastrar Funcionário</a></div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,23 @@
+[Unit]
+Description=Sistema Web de Automacao TST
+After=network.target postgresql.service
+
+[Service]
+Type=notify
+User=sistema_tst
+Group=www-data
+WorkingDirectory=/opt/sistema_tst
+EnvironmentFile=/opt/sistema_tst/.env
+ExecStart=/opt/sistema_tst/.venv/bin/gunicorn --workers 2 --threads 2 --timeout 300 --bind 127.0.0.1:8000 wsgi:app
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+PrivateTmp=true
+NoNewPrivileges=true
+UMask=0027
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/sistema_tst/storage /opt/sistema_tst/instance
+
+[Install]
+WantedBy=multi-user.target

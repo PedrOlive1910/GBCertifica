@@ -6,6 +6,7 @@ from flask import (
     abort,
     current_app,
     flash,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -377,8 +378,12 @@ def gerar(emissao_id):
     if not form.validate_on_submit():
         abort(400)
     emissao = emissao_do_tenant_ou_404(emissao_id)
+    resposta_json = request.headers.get("X-Requested-With") == "XMLHttpRequest"
     if emissao.status == StatusEmissao.PROCESSANDO:
-        flash("Esta emissão já está sendo processada.", "error")
+        mensagem = "Esta emissão já está sendo processada."
+        if resposta_json:
+            return jsonify(ok=False, mensagem=mensagem), 409
+        flash(mensagem, "error")
         return redirect(url_for("emissoes.detalhar", emissao_id=emissao.id))
     try:
         gerar_emissao(emissao)
@@ -391,7 +396,14 @@ def gerar(emissao_id):
             entidade_id=emissao.id,
             commit=True,
         )
-        flash(f"Não foi possível gerar os documentos: {erro}", "error")
+        mensagem = f"Não foi possível gerar os documentos: {erro}"
+        if resposta_json:
+            return jsonify(
+                ok=False,
+                mensagem=mensagem,
+                status_url=url_for("emissoes.status_geracao", emissao_id=emissao.id),
+            ), 500
+        flash(mensagem, "error")
     else:
         registrar_auditoria(
             "GEROU",
@@ -402,8 +414,41 @@ def gerar(emissao_id):
             detalhes={"documentos": [item.tipo_documento for item in emissao.documentos]},
             commit=True,
         )
-        flash("Documentos gerados em DOCX, PDF e JPEG.", "success")
+        mensagem = "Documentos gerados em DOCX, PDF e JPEG."
+        if resposta_json:
+            return jsonify(
+                ok=True,
+                mensagem=mensagem,
+                destino=url_for("emissoes.detalhar", emissao_id=emissao.id),
+            )
+        flash(mensagem, "success")
     return redirect(url_for("emissoes.detalhar", emissao_id=emissao.id))
+
+
+@bp.get("/<string:emissao_id>/status-geracao")
+def status_geracao(emissao_id):
+    emissao = emissao_do_tenant_ou_404(emissao_id)
+    total = len(emissao.documentos)
+    concluidos = sum(
+        1 for item in emissao.documentos if item.status == StatusDocumento.CONCLUIDO
+    )
+    erros = sum(1 for item in emissao.documentos if item.status == StatusDocumento.ERRO)
+    processando = next(
+        (item.titulo for item in emissao.documentos if item.status == StatusDocumento.PROCESSANDO),
+        None,
+    )
+    percentual = round((concluidos / total) * 100) if total else 0
+    if emissao.status == StatusEmissao.PROCESSANDO and percentual == 0:
+        percentual = 8
+    return jsonify(
+        status=emissao.status,
+        total=total,
+        concluidos=concluidos,
+        erros=erros,
+        processando=processando,
+        percentual=percentual,
+        concluida=emissao.status == StatusEmissao.CONCLUIDA,
+    )
 
 
 @bp.post("/<string:emissao_id>/cancelar")

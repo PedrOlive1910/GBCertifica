@@ -254,6 +254,51 @@ def converter_para_pdf(docx_path: Path, output_dir: Path) -> Path:
         shutil.rmtree(profile_dir, ignore_errors=True)
 
 
+def converter_lote_para_pdf(docx_paths: list[Path], output_dir: Path) -> dict[Path, Path]:
+    """Converte vários DOCX em uma única inicialização do LibreOffice."""
+    executavel = localizar_libreoffice()
+    if not executavel:
+        raise ErroGeracaoDocumento(
+            "LibreOffice não encontrado. No Windows, informe no arquivo .env: "
+            "LIBREOFFICE_PATH=C:/Program Files/LibreOffice/program/soffice.exe"
+        )
+    if not docx_paths:
+        return {}
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    profile_dir = Path(tempfile.mkdtemp(prefix="tst_lo_lote_"))
+    try:
+        comando = [
+            executavel,
+            "--headless",
+            f"-env:UserInstallation={profile_dir.as_uri()}",
+            "--convert-to",
+            "pdf",
+            "--outdir",
+            str(output_dir),
+            *[str(path) for path in docx_paths],
+        ]
+        resultado = subprocess.run(
+            comando,
+            capture_output=True,
+            text=True,
+            timeout=max(180, len(docx_paths) * 60),
+            check=False,
+        )
+        convertidos = {path: output_dir / f"{path.stem}.pdf" for path in docx_paths}
+        ausentes = [pdf.name for pdf in convertidos.values() if not pdf.is_file()]
+        if resultado.returncode != 0 or ausentes:
+            detalhe = (resultado.stderr or resultado.stdout or "erro desconhecido").strip()
+            if ausentes:
+                detalhe = f"Arquivos não convertidos: {', '.join(ausentes)}. {detalhe}".strip()
+            raise ErroGeracaoDocumento(f"Falha na conversão em lote para PDF: {detalhe}")
+        for pdf_path in convertidos.values():
+            remover_paginas_pdf_vazias(pdf_path)
+        return convertidos
+    finally:
+        shutil.rmtree(profile_dir, ignore_errors=True)
+
+
 def remover_paginas_pdf_vazias(pdf_path: Path) -> None:
     """Remove páginas totalmente vazias criadas pelo LibreOffice em modelos antigos."""
     leitor = PdfReader(str(pdf_path))
@@ -373,18 +418,82 @@ def gerar_documento(documento) -> None:
 
 def gerar_emissao(emissao) -> None:
     emissao.status = StatusEmissao.PROCESSANDO
+    emissao.concluido_em = None
+    for documento in emissao.documentos:
+        documento.status = StatusDocumento.PENDENTE
+        documento.erro_processamento = None
     db.session.commit()
     documento_atual = None
     try:
-        for documento in emissao.documentos:
-            documento_atual = documento
-            gerar_documento(documento)
+        with tempfile.TemporaryDirectory(prefix="tst_emissao_") as temporario:
+            raiz_temporaria = Path(temporario)
+            itens = []
+            for documento in emissao.documentos:
+                documento_atual = documento
+                documento.status = StatusDocumento.PROCESSANDO
+                db.session.commit()
+
+                pasta_temporaria = raiz_temporaria / documento.id
+                pasta_temporaria.mkdir(parents=True, exist_ok=True)
+                base = str(uuid.uuid4())
+                docx_path = pasta_temporaria / f"{base}.docx"
+                renderizar_docx(documento, docx_path)
+                itens.append((documento, pasta_temporaria, docx_path))
+
+            pdfs = converter_lote_para_pdf(
+                [docx_path for _, _, docx_path in itens],
+                raiz_temporaria / "pdfs",
+            )
+            arquivos_prontos = []
+            for documento, pasta_temporaria, docx_path in itens:
+                documento_atual = documento
+                pdf_origem = pdfs[docx_path]
+                pdf_path = pasta_temporaria / pdf_origem.name
+                shutil.move(str(pdf_origem), str(pdf_path))
+                paginas = converter_pdf_para_jpeg(pdf_path, pasta_temporaria)
+                arquivos_prontos.append(
+                    (documento, pasta_temporaria, docx_path, pdf_path, paginas)
+                )
+
+            root = Path(current_app.config["DOCUMENTS_ROOT"])
+            for documento, _, docx_temp, pdf_temp, paginas_temp in arquivos_prontos:
+                documento_atual = documento
+                remover_arquivos_anteriores(documento)
+                pasta_final = (
+                    root
+                    / documento.emissao.empresa.tenant_id
+                    / documento.emissao_id
+                    / documento.id
+                )
+                pasta_final.mkdir(parents=True, exist_ok=True)
+                arquivos_finais = []
+                for origem in (docx_temp, pdf_temp, *paginas_temp):
+                    destino = pasta_final / origem.name
+                    shutil.move(str(origem), str(destino))
+                    arquivos_finais.append(destino)
+
+                docx_final, pdf_final, *paginas_finais = arquivos_finais
+                if os.name != "nt":
+                    pasta_final.chmod(0o750)
+                    for arquivo_gerado in arquivos_finais:
+                        arquivo_gerado.chmod(0o640)
+
+                registrar_arquivo(documento, docx_final, FormatoArquivo.DOCX)
+                registrar_arquivo(documento, pdf_final, FormatoArquivo.PDF)
+                for numero, pagina_path in enumerate(paginas_finais, start=1):
+                    registrar_arquivo(
+                        documento, pagina_path, FormatoArquivo.JPEG, numero
+                    )
+                documento.status = StatusDocumento.CONCLUIDO
+                documento.erro_processamento = None
+                db.session.commit()
     except Exception as erro:
         db.session.rollback()
         emissao.status = StatusEmissao.ERRO
-        if documento_atual is not None:
-            documento_atual.status = StatusDocumento.ERRO
-            documento_atual.erro_processamento = str(erro)[:4000]
+        for documento in emissao.documentos:
+            if documento.status != StatusDocumento.CONCLUIDO:
+                documento.status = StatusDocumento.ERRO
+                documento.erro_processamento = str(erro)[:4000]
         db.session.commit()
         raise
     emissao.status = StatusEmissao.CONCLUIDA

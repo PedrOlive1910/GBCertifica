@@ -7,3 +7,4 @@ python-dotenv>=1.1,<2
 gunicorn>=23,<24
 docxtpl>=0.20,<1
 pypdf>=6.0,<7
+reportlab>=4.4,<5

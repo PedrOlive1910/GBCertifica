@@ -1,5 +1,6 @@
 from datetime import date
 from pathlib import Path
+from unittest.mock import patch
 from zipfile import ZipFile
 
 from sqlalchemy import select
@@ -94,6 +95,51 @@ def test_relatorio_abre(client):
     resposta = client.get("/relatorios/")
     assert resposta.status_code == 200
     assert "Relatórios" in resposta.get_data(as_text=True)
+
+
+def test_relatorio_pdf_e_gerado_com_os_filtros(app, client):
+    with app.app_context():
+        empresa, funcionario = criar_empresa_funcionario()
+        ids = empresa.id, funcionario.id
+    client.post("/emissoes/nova", data=dados_emissao(*ids))
+    resposta = client.get(f"/relatorios/pdf?empresa_id={ids[0]}&tipo=NR_06")
+    assert resposta.status_code == 200
+    assert resposta.mimetype == "application/pdf"
+    assert resposta.data.startswith(b"%PDF")
+    assert "attachment" in resposta.headers["Content-Disposition"]
+
+
+def test_geracao_ajax_retorna_somente_apos_concluir(app, client):
+    with app.app_context():
+        empresa, funcionario = criar_empresa_funcionario()
+        ids = empresa.id, funcionario.id
+    client.post("/emissoes/nova", data=dados_emissao(*ids))
+    with app.app_context():
+        emissao = db.session.scalar(select(Emissao))
+        emissao_id = emissao.id
+
+    with patch("app.emissoes.routes.gerar_emissao") as gerar_mock:
+        resposta = client.post(
+            f"/emissoes/{emissao_id}/gerar",
+            headers={"X-Requested-With": "XMLHttpRequest", "Accept": "application/json"},
+        )
+    assert resposta.status_code == 200
+    assert resposta.get_json()["ok"] is True
+    gerar_mock.assert_called_once()
+
+
+def test_status_da_geracao_retorna_progresso(app, client):
+    with app.app_context():
+        empresa, funcionario = criar_empresa_funcionario()
+        ids = empresa.id, funcionario.id
+    client.post("/emissoes/nova", data=dados_emissao(*ids))
+    with app.app_context():
+        emissao_id = db.session.scalar(select(Emissao.id))
+    resposta = client.get(f"/emissoes/{emissao_id}/status-geracao")
+    dados = resposta.get_json()
+    assert resposta.status_code == 200
+    assert dados["total"] == 2
+    assert dados["concluidos"] == 0
 
 
 def test_localiza_libreoffice_pelo_env(app, tmp_path, monkeypatch):

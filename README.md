@@ -6,12 +6,15 @@ documentos de Segurança do Trabalho em DOCX, PDF e JPEG.
 ## Funcionalidades
 
 - Layout profissional, responsivo e em tons de verde;
-- Dashboard, CRUD de empresas e CRUD de funcionários;
+- Dashboard operacional com indicadores, pendências e atalhos;
+- CRUD de empresas e CRUD de funcionários com formulários responsivos;
 - Emissões com Ficha de EPI, Ordem de Serviço, NR-06, NR-12, NR-18 e NR-35;
 - Datas sequenciais, ignorando domingos;
 - EPIs e máquinas da NR-12 preenchidos dinamicamente;
 - Preview e download em DOCX, PDF e JPEG;
-- Relatórios por empresa, período e tipo de documento;
+- Relatórios por empresa, período e tipo de documento, com paginação e PDF;
+- Barra de progresso durante a geração de relatórios e documentos;
+- Conversão dos documentos em lote para reduzir inicializações do LibreOffice;
 - Login, usuários e níveis de acesso;
 - Log de auditoria com usuário, tela, ação, alteração, IP e horário;
 - Isolamento de contas clientes para operação multi-tenant.
@@ -149,6 +152,20 @@ python run.py
 
 Acesse `http://127.0.0.1:5000` e faça login com o administrador configurado.
 
+### Atualização desta interface
+
+Esta atualização não cria novas tabelas nem altera colunas do banco. Em uma
+instalação existente, substitua os arquivos do projeto, preserve seu `.env` e
+execute:
+
+```powershell
+pip install -r requirements.txt
+python run.py
+```
+
+A versão definida em `APP_VERSION` é exibida na tela de login, no menu, no
+rodapé, no cabeçalho interno e nos relatórios PDF.
+
 ## Testes
 
 ```powershell
@@ -156,8 +173,9 @@ pip install -r requirements-dev.txt
 pytest -q
 ```
 
-Os testes cobrem CRUDs, templates, login, hash de senha, permissões, força
-bruta, recuperação de senha, auditoria, multi-tenant e proteção de downloads.
+Os 24 testes cobrem CRUDs, templates, login, hash de senha, permissões, força
+bruta, recuperação de senha, auditoria, multi-tenant, proteção de downloads,
+progresso de geração e exportação dos relatórios em PDF.
 
 ## Produção na Hostinger
 

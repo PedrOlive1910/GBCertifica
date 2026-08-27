@@ -32,6 +32,12 @@
             const input = label.querySelector("input");
             label.classList.toggle("selected", input.checked);
         });
+        const selected = document.querySelectorAll('[data-doc]:checked').length;
+        const counter = document.getElementById("selectedDocumentsCount");
+        if (counter) counter.textContent = selected;
+        const workflow = document.querySelectorAll(".emission-workflow span");
+        if (workflow.length > 1) workflow[1].classList.toggle("active", selected > 0);
+        if (workflow.length > 2) workflow[2].classList.toggle("active", selected > 0);
     }
 
     function bindRemoveButtons() {
@@ -70,4 +76,13 @@
     filterEmployees();
     toggleSections();
     bindRemoveButtons();
+
+    const emissionForm = document.getElementById("emissaoForm");
+    if (emissionForm) emissionForm.addEventListener("submit", function () {
+        const submit = emissionForm.querySelector('[type="submit"]');
+        if (submit) {
+            submit.disabled = true;
+            submit.value = "Salvando emissão...";
+        }
+    });
 }());

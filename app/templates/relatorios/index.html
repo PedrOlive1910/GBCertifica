@@ -3,11 +3,57 @@
 {% block title %}Relatórios | Sistema TST{% endblock %}
 
 {% block content %}
-<section class="page-header"><span class="eyebrow">Indicadores</span><h1>Relatórios</h1><p>Filtre o histórico por empresa, período e tipo de documento.</p></section>
-<section class="panel filter-panel"><form class="filter-form report-filters" method="get"><div class="field field-grow"><label for="empresa_id">Empresa</label><select id="empresa_id" name="empresa_id"><option value="">Todas</option>{% for empresa in empresas %}<option value="{{ empresa.id }}" {{ 'selected' if empresa_id == empresa.id else '' }}>{{ empresa.razao_social }}</option>{% endfor %}</select></div><div class="field"><label for="tipo">Documento</label><select id="tipo" name="tipo"><option value="">Todos</option>{% for valor, rotulo in rotulos_documentos.items() %}<option value="{{ valor }}" {{ 'selected' if tipo == valor else '' }}>{{ rotulo }}</option>{% endfor %}</select></div><div class="field"><label for="data_inicio">De</label><input id="data_inicio" name="data_inicio" type="date" value="{{ data_inicio }}"></div><div class="field"><label for="data_fim">Até</label><input id="data_fim" name="data_fim" type="date" value="{{ data_fim }}"></div><div class="filter-actions"><button class="button" type="submit">Aplicar</button><a class="button button-secondary" href="{{ url_for('relatorios.index') }}">Limpar</a></div></form></section>
+<section class="page-header page-header-actions report-header">
+    <div><span class="eyebrow">Análise e exportação</span><h1>Relatórios</h1><p>Consulte os indicadores e gere um PDF profissional com os filtros aplicados.</p></div>
+    <button class="button button-with-icon" id="exportReportPdf" type="button" data-url="{{ pdf_url }}"><span>⇩</span> Gerar relatório PDF</button>
+</section>
 
-<section class="cards report-cards"><article class="card card-featured"><span>Total de documentos</span><strong>{{ total }}</strong></article>{% for item in ['FICHA_EPI', 'ORDEM_SERVICO', 'NR_06', 'NR_12', 'NR_18', 'NR_35'] %}<article class="card"><span>{{ rotulos_documentos[item] }}</span><strong>{{ por_tipo[item] }}</strong></article>{% endfor %}</section>
+<section class="panel report-filter-panel">
+    <div class="filter-heading"><div><h2>Filtros do relatório</h2><p>Combine empresa, documento e período para refinar os resultados.</p></div><span class="result-pill">{{ total }} resultado(s)</span></div>
+    <form class="report-filter-grid" method="get">
+        <div class="field field-company"><label for="empresa_id">Empresa</label><select id="empresa_id" name="empresa_id"><option value="">Todas as empresas</option>{% for empresa in empresas %}<option value="{{ empresa.id }}" {{ 'selected' if filtros.empresa_id == empresa.id else '' }}>{{ empresa.razao_social }}</option>{% endfor %}</select></div>
+        <div class="field"><label for="tipo">Tipo de documento</label><select id="tipo" name="tipo"><option value="">Todos os documentos</option>{% for valor, rotulo in rotulos_documentos.items() %}<option value="{{ valor }}" {{ 'selected' if filtros.tipo == valor else '' }}>{{ rotulo }}</option>{% endfor %}</select></div>
+        <div class="field"><label for="data_inicio">Data inicial</label><input id="data_inicio" name="data_inicio" type="date" value="{{ filtros.data_inicio }}"></div>
+        <div class="field"><label for="data_fim">Data final</label><input id="data_fim" name="data_fim" type="date" value="{{ filtros.data_fim }}"></div>
+        <div class="filter-actions"><button class="button" type="submit">Aplicar filtros</button><a class="button button-secondary" href="{{ url_for('relatorios.index') }}">Limpar</a></div>
+    </form>
+</section>
 
-<section class="report-layout"><article class="panel"><h2>Documentos encontrados</h2>{% if documentos %}<div class="table-responsive"><table><thead><tr><th>Data</th><th>Documento</th><th>Empresa</th><th>Funcionário</th><th>Status</th></tr></thead><tbody>{% for documento in documentos %}<tr><td>{{ documento.data_documento | data_br }}</td><td><a class="text-link" href="{{ url_for('emissoes.detalhar', emissao_id=documento.emissao_id) }}">{{ documento.titulo }}</a></td><td>{{ documento.emissao.empresa_snapshot.get('razao_social') }}</td><td>{{ documento.emissao.funcionario_snapshot.get('nome') }}</td><td><span class="badge status-{{ documento.status | lower }}">{{ documento.status | title }}</span></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-inline">Nenhum documento corresponde aos filtros.</div>{% endif %}</article>
-<aside class="panel ranking-panel"><h2>Por empresa</h2>{% if por_empresa %}<ol class="ranking-list">{% for nome, quantidade in por_empresa %}<li><span>{{ nome }}</span><strong>{{ quantidade }}</strong></li>{% endfor %}</ol>{% else %}<p>Sem dados para o período.</p>{% endif %}</aside></section>
+<section class="report-metrics" aria-label="Resumo do relatório">
+    <article class="report-metric report-metric-primary"><span>Total encontrado</span><strong>{{ total }}</strong><small>documento(s) no período</small></article>
+    <article class="report-metric"><span>Concluídos</span><strong>{{ por_status['CONCLUIDO'] }}</strong><small>arquivos prontos</small></article>
+    <article class="report-metric"><span>Pendentes</span><strong>{{ por_status['PENDENTE'] + por_status['PROCESSANDO'] }}</strong><small>aguardando conclusão</small></article>
+    <article class="report-metric {{ 'metric-has-error' if por_status['ERRO'] else '' }}"><span>Com erro</span><strong>{{ por_status['ERRO'] }}</strong><small>precisam de atenção</small></article>
+</section>
+
+<section class="report-insights-grid">
+    <article class="panel">
+        <div class="panel-heading"><div><span class="eyebrow">Distribuição</span><h2>Documentos por tipo</h2></div></div>
+        <div class="report-type-grid">
+            {% for item in ['FICHA_EPI', 'ORDEM_SERVICO', 'NR_06', 'NR_12', 'NR_18', 'NR_35'] %}
+                <div class="type-stat"><div><span>{{ rotulos_documentos[item] }}</span><strong>{{ por_tipo[item] }}</strong></div><progress value="{{ por_tipo[item] }}" max="{{ total if total else 1 }}">{{ por_tipo[item] }}</progress></div>
+            {% endfor %}
+        </div>
+    </article>
+    <aside class="panel company-ranking-panel">
+        <div class="panel-heading"><div><span class="eyebrow">Ranking</span><h2>Empresas com mais documentos</h2></div></div>
+        {% if por_empresa %}<div class="company-ranking">{% for nome, quantidade in por_empresa %}<div class="company-rank-row"><div><span>{{ loop.index }}</span><strong title="{{ nome }}">{{ nome }}</strong><b>{{ quantidade }}</b></div><progress value="{{ quantidade }}" max="{{ maior_empresa }}">{{ quantidade }}</progress></div>{% endfor %}</div>{% else %}<div class="empty-inline">Sem dados para os filtros selecionados.</div>{% endif %}
+    </aside>
+</section>
+
+<section class="panel report-results-panel">
+    <div class="panel-heading"><div><span class="eyebrow">Detalhamento</span><h2>Documentos encontrados</h2><p>Mostrando até {{ paginacao.per_page }} itens por página.</p></div><button class="button button-secondary button-small" id="exportReportPdfSecondary" type="button" data-url="{{ pdf_url }}">Exportar PDF</button></div>
+    {% if documentos %}
+        <div class="table-responsive"><table><thead><tr><th>Data</th><th>Documento</th><th>Empresa</th><th>Funcionário</th><th>Status</th><th></th></tr></thead><tbody>{% for documento in documentos %}<tr><td>{{ documento.data_documento | data_br }}</td><td><strong>{{ documento.titulo }}</strong></td><td>{{ documento.emissao.empresa_snapshot.get('razao_social', '—') }}</td><td>{{ documento.emissao.funcionario_snapshot.get('nome', '—') }}</td><td><span class="badge status-{{ documento.status | lower }}">{{ documento.status | title }}</span></td><td><a class="icon-link" aria-label="Abrir emissão" href="{{ url_for('emissoes.detalhar', emissao_id=documento.emissao_id) }}">→</a></td></tr>{% endfor %}</tbody></table></div>
+        {% if paginacao.pages > 1 %}<nav class="pagination" aria-label="Paginação do relatório">{% if paginacao.has_prev %}<a href="{{ url_for('relatorios.index', pagina=paginacao.prev_num, empresa_id=filtros.empresa_id, tipo=filtros.tipo, data_inicio=filtros.data_inicio, data_fim=filtros.data_fim) }}">‹</a>{% endif %}{% for numero in paginacao.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}{% if numero %}<a class="{{ 'active' if numero == paginacao.page else '' }}" href="{{ url_for('relatorios.index', pagina=numero, empresa_id=filtros.empresa_id, tipo=filtros.tipo, data_inicio=filtros.data_inicio, data_fim=filtros.data_fim) }}">{{ numero }}</a>{% else %}<span>…</span>{% endif %}{% endfor %}{% if paginacao.has_next %}<a href="{{ url_for('relatorios.index', pagina=paginacao.next_num, empresa_id=filtros.empresa_id, tipo=filtros.tipo, data_inicio=filtros.data_inicio, data_fim=filtros.data_fim) }}">›</a>{% endif %}</nav>{% endif %}
+    {% else %}
+        <div class="empty-state compact-empty"><span>⌕</span><h3>Nenhum documento encontrado</h3><p>Altere os filtros ou limpe a pesquisa para visualizar o histórico.</p></div>
+    {% endif %}
+</section>
+
+<div class="processing-overlay" id="reportProgress" role="dialog" aria-modal="true" aria-labelledby="reportProgressTitle" hidden>
+    <div class="processing-card"><span class="processing-mark">TST</span><h2 id="reportProgressTitle">Gerando relatório em PDF</h2><p id="reportProgressText">Organizando os dados e montando as páginas...</p><div class="loading-track"><span></span></div><small>Aguarde. O download começará automaticamente quando tudo estiver pronto.</small></div>
+</div>
 {% endblock %}
+
+{% block scripts %}<script src="{{ url_for('static', filename='js/relatorios.js') }}"></script>{% endblock %}

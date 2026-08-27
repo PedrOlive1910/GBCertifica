@@ -3,64 +3,31 @@
 {% block title %}{{ titulo }} | Sistema TST{% endblock %}
 
 {% block content %}
-<section class="page-header">
-    <div>
-        <span class="eyebrow">Empresas</span>
-        <h1>{{ titulo }}</h1>
-        <p>Preencha os dados da empresa. Todos os campos são obrigatórios.</p>
-    </div>
+<section class="page-header page-header-actions">
+    <div><span class="eyebrow">Cadastro de empresas</span><h1>{{ titulo }}</h1><p>Mantenha os dados da contratante completos para preencher os documentos corretamente.</p></div>
+    <a class="button button-secondary" href="{{ url_for('empresas.listar') }}">← Voltar para empresas</a>
 </section>
 
-<section class="panel form-panel">
-    <form method="post" novalidate>
-        {{ form.hidden_tag() }}
-
-        <div class="form-grid">
-            <div class="field field-full">
-                {{ form.razao_social.label }}
-                {{ form.razao_social(class_='input-error' if form.razao_social.errors else '',
-                    placeholder='Ex.: Empresa Exemplo Ltda.', autocomplete='organization') }}
-                {% for erro in form.razao_social.errors %}
-                    <small class="field-error">{{ erro }}</small>
-                {% endfor %}
+<div class="form-page-grid">
+    <section class="panel professional-form-panel">
+        <div class="form-panel-heading"><span class="form-heading-icon">▦</span><div><h2>Dados da empresa</h2><p>Os campos marcados são obrigatórios.</p></div></div>
+        <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="form-grid form-grid-spacious">
+                <div class="field field-full"><div class="label-row">{{ form.razao_social.label }}<span>Obrigatório</span></div>{{ form.razao_social(class_='input-error' if form.razao_social.errors else '', placeholder='Ex.: Empresa Exemplo Ltda.', autocomplete='organization') }}<small class="field-help">Use o nome registrado oficialmente no CNPJ.</small>{% for erro in form.razao_social.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>
+                <div class="field"><div class="label-row">{{ form.cnpj.label }}<span>Obrigatório</span></div>{{ form.cnpj(id='cnpj', class_='input-error' if form.cnpj.errors else '', placeholder='00.000.000/0000-00', inputmode='numeric', autocomplete='off') }}<small class="field-help">A validação e a formatação são automáticas.</small>{% for erro in form.cnpj.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>
+                <div class="field"><div class="label-row">{{ form.cidade.label }}<span>Obrigatório</span></div>{{ form.cidade(class_='input-error' if form.cidade.errors else '', placeholder='Ex.: Belo Horizonte', autocomplete='address-level2') }}{% for erro in form.cidade.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>
+                <div class="field field-full"><div class="label-row">{{ form.endereco_completo.label }}<span>Obrigatório</span></div>{{ form.endereco_completo(class_='input-error' if form.endereco_completo.errors else '', placeholder='Rua, número, bairro, complemento e CEP', autocomplete='street-address') }}<small class="field-help">O endereço será reutilizado nos certificados e demais documentos.</small>{% for erro in form.endereco_completo.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>
             </div>
-
-            <div class="field">
-                {{ form.cnpj.label }}
-                {{ form.cnpj(id='cnpj', class_='input-error' if form.cnpj.errors else '',
-                    placeholder='00.000.000/0000-00', inputmode='numeric', autocomplete='off') }}
-                {% for erro in form.cnpj.errors %}
-                    <small class="field-error">{{ erro }}</small>
-                {% endfor %}
-            </div>
-
-            <div class="field">
-                {{ form.cidade.label }}
-                {{ form.cidade(class_='input-error' if form.cidade.errors else '',
-                    placeholder='Ex.: Belo Horizonte', autocomplete='address-level2') }}
-                {% for erro in form.cidade.errors %}
-                    <small class="field-error">{{ erro }}</small>
-                {% endfor %}
-            </div>
-
-            <div class="field field-full">
-                {{ form.endereco_completo.label }}
-                {{ form.endereco_completo(class_='input-error' if form.endereco_completo.errors else '',
-                    placeholder='Rua, número, bairro e complemento', autocomplete='street-address') }}
-                {% for erro in form.endereco_completo.errors %}
-                    <small class="field-error">{{ erro }}</small>
-                {% endfor %}
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <a class="button button-secondary" href="{{ url_for('empresas.listar') }}">Cancelar</a>
-            {{ form.submit(class_='button', value=texto_botao) }}
-        </div>
-    </form>
-</section>
+            <div class="form-actions professional-actions"><a class="button button-secondary" href="{{ url_for('empresas.listar') }}">Cancelar</a>{{ form.submit(class_='button', value=texto_botao) }}</div>
+        </form>
+    </section>
+    <aside class="panel form-guide-card">
+        <span class="eyebrow">Antes de salvar</span><h2>Confira os dados</h2>
+        <ul class="form-checklist"><li><span>1</span><div><strong>Razão Social</strong><small>Igual ao cartão do CNPJ.</small></div></li><li><span>2</span><div><strong>CNPJ válido</strong><small>Não pode estar duplicado nesta conta.</small></div></li><li><span>3</span><div><strong>Endereço completo</strong><small>Será impresso nos documentos gerados.</small></div></li></ul>
+        <div class="form-info-box"><strong>Proteção do histórico</strong><p>Empresas com documentos emitidos são desativadas, e não apagadas definitivamente.</p></div>
+    </aside>
+</div>
 {% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/empresas.js') }}"></script>
-{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/empresas.js') }}"></script>{% endblock %}

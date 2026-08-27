@@ -5,11 +5,13 @@
 {% macro field_errors(field) %}{% for erro in field.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}{% endmacro %}
 
 {% block content %}
-<section class="page-header"><span class="eyebrow">Emissão de documentos</span><h1>{{ titulo }}</h1><p>Selecione o funcionário, os modelos e preencha somente os blocos necessários.</p></section>
+<section class="page-header page-header-actions"><div><span class="eyebrow">Emissão de documentos</span><h1>{{ titulo }}</h1><p>Preencha o fluxo por etapas. O sistema mostrará somente os campos necessários.</p></div><a class="button button-secondary" href="{{ url_for('emissoes.detalhar', emissao_id=emissao.id) if emissao else url_for('emissoes.listar') }}">← Voltar</a></section>
+
+<nav class="emission-workflow" aria-label="Etapas da emissão"><span class="active"><b>1</b><small>Identificação</small></span><i></i><span><b>2</b><small>Documentos</small></span><i></i><span><b>3</b><small>Dados específicos</small></span><i></i><span><b>4</b><small>Gerar arquivos</small></span></nav>
 
 {% if erros_especificos %}<div class="alert alert-error"><strong>Revise os dados:</strong><ul>{% for erro in erros_especificos %}<li>{{ erro }}</li>{% endfor %}</ul></div>{% endif %}
 
-<form method="post" novalidate id="emissaoForm">
+<form method="post" novalidate id="emissaoForm" class="emission-form">
     {{ form.hidden_tag() }}
     <section class="panel form-section">
         <div class="section-title"><span class="step-number">1</span><div><h2>Empresa e funcionário</h2><p>Dados reutilizados em todos os documentos.</p></div></div>
@@ -24,7 +26,7 @@
     </section>
 
     <section class="panel form-section">
-        <div class="section-title"><span class="step-number">2</span><div><h2>Documentos</h2><p>Marque tudo o que será gerado nesta emissão.</p></div></div>
+        <div class="section-title section-title-between"><div class="section-title-main"><span class="step-number">2</span><div><h2>Documentos</h2><p>Marque tudo o que será gerado nesta emissão.</p></div></div><span class="selection-counter"><strong id="selectedDocumentsCount">0</strong> selecionado(s)</span></div>
         <div class="document-grid">
             {% for tipo, rotulo in rotulos_documentos.items() %}
                 <label class="document-option"><input type="checkbox" name="documentos" value="{{ tipo }}" data-doc="{{ tipo }}" {{ 'checked' if tipo in tipos_selecionados else '' }}><span class="checkmark">✓</span><span><strong>{{ rotulo }}</strong><small>DOCX, PDF e JPEG</small></span></label>
@@ -62,7 +64,7 @@
         </div>
     </section>
 
-    <div class="sticky-actions"><a class="button button-secondary" href="{{ url_for('emissoes.detalhar', emissao_id=emissao.id) if emissao else url_for('emissoes.listar') }}">Cancelar</a>{{ form.submit(class_='button', value=texto_botao) }}</div>
+    <div class="sticky-actions"><div><strong>Pronto para continuar?</strong><small>Revise os campos antes de salvar a emissão.</small></div><span><a class="button button-secondary" href="{{ url_for('emissoes.detalhar', emissao_id=emissao.id) if emissao else url_for('emissoes.listar') }}">Cancelar</a>{{ form.submit(class_='button', value=texto_botao) }}</span></div>
 </form>
 
 <template id="epiRowTemplate"><tr><td><input name="epi_quantidade[]" placeholder="01"></td><td><input name="epi_descricao[]" placeholder="Capacete de segurança"></td><td><input name="epi_ca[]" placeholder="12345"></td><td><input name="epi_data_entrega[]" type="date"></td><td><input name="epi_data_devolucao[]" type="date"></td><td><input name="epi_assinatura[]" value="X"></td><td><button class="icon-button remove-row" type="button">×</button></td></tr></template>

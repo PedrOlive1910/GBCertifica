@@ -27,3 +27,15 @@ class UsuarioForm(FlaskForm):
 
 class StatusUsuarioForm(FlaskForm):
     submit = SubmitField("Alterar status")
+
+
+class RedefinirSenhaUsuarioForm(FlaskForm):
+    senha = PasswordField(
+        "Senha temporária",
+        validators=[Length(min=8, max=128), validar_senha_forte],
+    )
+    confirmar_senha = PasswordField(
+        "Confirmar senha temporária",
+        validators=[EqualTo("senha", message="As senhas não conferem.")],
+    )
+    submit = SubmitField("Redefinir senha")

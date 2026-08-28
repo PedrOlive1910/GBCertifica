@@ -1,5 +1,3 @@
-import hashlib
-import secrets
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urljoin, urlparse
 
@@ -7,13 +5,12 @@ from flask import current_app, flash, redirect, render_template, request, sessio
 from sqlalchemy import func, select
 
 from app.extensions import db
-from app.models import LogAuditoria, TokenRedefinicaoSenha, Usuario
+from app.models import LogAuditoria, Usuario
 from app.services.auditoria import registrar_auditoria
-from app.services.email import ErroEnvioEmail, enviar_email
-from app.security import current_user, login_user, logout_user
+from app.security import current_user, login_required, login_user, logout_user
 
 from . import bp
-from .forms import LoginForm, RedefinirSenhaForm, SolicitarRedefinicaoForm
+from .forms import LoginForm, RedefinirSenhaForm
 
 
 def _agora():
@@ -95,6 +92,9 @@ def login():
             session.clear()
             session.permanent = True
             login_user(usuario)
+            session["_password_fingerprint"] = usuario.senha_hash[-24:]
+            if usuario.deve_trocar_senha:
+                return redirect(url_for("auth.trocar_senha_temporaria"))
             destino = form.proximo.data
             return redirect(destino if _destino_seguro(destino) else url_for("main.dashboard"))
 
@@ -126,97 +126,41 @@ def login():
 
 @bp.route("/esqueci-a-senha", methods=["GET", "POST"])
 def solicitar_redefinicao():
-    form = SolicitarRedefinicaoForm()
-    if form.validate_on_submit():
-        email = form.email.data.strip().lower()
-        usuario = db.session.scalar(
-            select(Usuario).where(Usuario.email == email, Usuario.ativo.is_(True))
-        )
-        if usuario:
-            agora = _agora()
-            for anterior in usuario.tokens_redefinicao:
-                if anterior.usado_em is None:
-                    anterior.usado_em = agora
-            token_aberto = secrets.token_urlsafe(48)
-            token = TokenRedefinicaoSenha(
-                usuario=usuario,
-                token_hash=hashlib.sha256(token_aberto.encode()).hexdigest(),
-                expira_em=agora + timedelta(hours=1),
-                solicitado_ip=_ip_atual(),
-            )
-            db.session.add(token)
-            db.session.flush()
-            caminho = url_for("auth.redefinir_senha", token=token_aberto)
-            link = f"{current_app.config['APP_BASE_URL'].rstrip('/')}{caminho}"
-            texto = (
-                f"Olá, {usuario.nome}.\n\n"
-                "Recebemos uma solicitação para redefinir sua senha do GBcertifica.\n"
-                f"Use o link abaixo em até 1 hora:\n\n{link}\n\n"
-                "O link é de uso único. Se você não solicitou, ignore este e-mail."
-            )
-            try:
-                enviar_email(usuario.email, "Redefinição de senha — GBcertifica", texto)
-            except ErroEnvioEmail as erro:
-                db.session.delete(token)
-                registrar_auditoria(
-                    "ERRO_EMAIL",
-                    "Autenticação",
-                    "Não foi possível enviar o e-mail de redefinição.",
-                    entidade_tipo="Usuario",
-                    entidade_id=usuario.id,
-                    detalhes={"erro": str(erro)},
-                    usuario=usuario,
-                )
-                current_app.logger.exception("Falha no envio da recuperação de senha")
-            else:
-                registrar_auditoria(
-                    "SOLICITOU_REDEFINICAO",
-                    "Autenticação",
-                    "Link de redefinição de senha solicitado.",
-                    entidade_tipo="Usuario",
-                    entidade_id=usuario.id,
-                    usuario=usuario,
-                )
-            db.session.commit()
-        flash(
-            "Se o e-mail estiver cadastrado, enviaremos um link válido por 1 hora.",
-            "success",
-        )
+    if request.method == "POST":
+        flash("Solicite a redefinição de senha ao administrador do sistema.", "success")
         return redirect(url_for("auth.login"))
-    return render_template("auth/solicitar_redefinicao.html", form=form)
+    return render_template("auth/solicitar_redefinicao.html")
 
 
 @bp.route("/redefinir-senha/<string:token>", methods=["GET", "POST"])
 def redefinir_senha(token):
-    token_hash = hashlib.sha256(token.encode()).hexdigest()
-    registro = db.session.scalar(
-        select(TokenRedefinicaoSenha).where(
-            TokenRedefinicaoSenha.token_hash == token_hash,
-            TokenRedefinicaoSenha.usado_em.is_(None),
-        )
-    )
-    if not registro or _como_utc(registro.expira_em) <= _agora():
-        flash("Este link é inválido ou expirou. Solicite um novo.", "error")
-        return redirect(url_for("auth.solicitar_redefinicao"))
+    flash("Este recurso está temporariamente sob controle do administrador.", "error")
+    return redirect(url_for("auth.solicitar_redefinicao"))
 
+
+@bp.route("/trocar-senha-temporaria", methods=["GET", "POST"])
+@login_required
+def trocar_senha_temporaria():
+    if not current_user.deve_trocar_senha:
+        return redirect(url_for("main.dashboard"))
     form = RedefinirSenhaForm()
     if form.validate_on_submit():
-        registro.usuario.definir_senha(form.senha.data)
-        registro.usuario.tentativas_falhas = 0
-        registro.usuario.bloqueado_ate = None
-        registro.usado_em = _agora()
+        current_user.definir_senha(form.senha.data)
+        current_user.deve_trocar_senha = False
+        current_user.tentativas_falhas = 0
+        current_user.bloqueado_ate = None
         registrar_auditoria(
-            "REDEFINIU_SENHA",
+            "TROCOU_SENHA_TEMPORARIA",
             "Autenticação",
-            "Senha redefinida por token de uso único.",
+            "Usuário substituiu a senha temporária.",
             entidade_tipo="Usuario",
-            entidade_id=registro.usuario_id,
-            usuario=registro.usuario,
+            entidade_id=current_user.id,
         )
         db.session.commit()
-        flash("Senha redefinida com sucesso. Faça login com a nova senha.", "success")
-        return redirect(url_for("auth.login"))
-    return render_template("auth/redefinir_senha.html", form=form)
+        session["_password_fingerprint"] = current_user.senha_hash[-24:]
+        flash("Senha pessoal criada com sucesso.", "success")
+        return redirect(url_for("main.dashboard"))
+    return render_template("auth/redefinir_senha.html", form=form, troca_obrigatoria=True)
 
 
 @bp.post("/logout")

@@ -1,4 +1,4 @@
-# GBcertifica — versão 1.2.1
+# GBcertifica — versão 1.2.2
 
 Sistema Flask para cadastrar empresas e funcionários, montar emissões e gerar
 documentos de Segurança do Trabalho em DOCX, PDF e JPEG.
@@ -85,7 +85,7 @@ Configure pelo menos estas variáveis no `.env`:
 
 ```env
 APP_CONFIG=development
-APP_VERSION=1.2.3
+APP_VERSION=1.2.2
 APP_TIMEZONE=America/Sao_Paulo
 SECRET_KEY=uma-chave-secreta-longa-e-aleatoria
 DATABASE_URL=postgresql+psycopg://usuario:senha@localhost:5432/gbcertifica_homolog
@@ -163,7 +163,7 @@ pip install -r requirements.txt
 python run.py
 ```
 
-A versão definida em `APP_VERSION` é exibida na tela de login, no menu, no
+A versão definida em `APP_VERSION` é exibida na tela de login e usada no
 rodapé, no cabeçalho interno e nos relatórios PDF.
 
 ## Testes

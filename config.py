@@ -31,7 +31,7 @@ def env_bool(nome, padrao=False):
 
 
 class Config:
-    APP_VERSION = os.getenv("APP_VERSION", "1.2.3")
+    APP_VERSION = os.getenv("APP_VERSION", "1.2.2")
     APP_TIMEZONE = os.getenv("APP_TIMEZONE", "America/Sao_Paulo")
     SECRET_KEY = os.getenv("SECRET_KEY", "troque-esta-chave-no-arquivo-env")
     SQLALCHEMY_DATABASE_URI = obter_url_banco()

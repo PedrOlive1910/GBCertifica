@@ -32,6 +32,29 @@ def garantir_tenant():
     return tenant
 
 
+def garantir_coluna_troca_obrigatoria():
+    """Inclui com segurança a coluna adicionada na versão 1.2.2."""
+    inspetor = inspect(db.engine)
+    if "usuarios" not in inspetor.get_table_names():
+        return
+    colunas = {item["name"] for item in inspetor.get_columns("usuarios")}
+    if "deve_trocar_senha" not in colunas:
+        db.session.execute(
+            text(
+                "ALTER TABLE usuarios ADD COLUMN deve_trocar_senha "
+                "BOOLEAN NOT NULL DEFAULT FALSE"
+            )
+        )
+        db.session.commit()
+    db.session.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_usuarios_deve_trocar_senha "
+            "ON usuarios (deve_trocar_senha)"
+        )
+    )
+    db.session.commit()
+
+
 def migrar_empresas_para_tenant(tenant):
     inspetor = inspect(db.engine)
     if "empresas" not in inspetor.get_table_names():
@@ -125,6 +148,7 @@ def criar_administrador_inicial(tenant):
 with app.app_context():
     # Cria primeiro as novas tabelas independentes. Tabelas existentes não são apagadas.
     db.create_all()
+    garantir_coluna_troca_obrigatoria()
     tenant_principal = garantir_tenant()
     migrar_empresas_para_tenant(tenant_principal)
     # Uma segunda passagem garante metadados após a atualização de bancos antigos.

@@ -14,8 +14,8 @@ def test_login_apresenta_identidade_gbcertifica(client):
 
     assert resposta.status_code == 200
     assert "GBcertifica" in html
-    assert "Versão 1.2.3" in html
-    assert "app.css?v=1.2.3" in html
+    assert "Versão 1.2.2" in html
+    assert "app.css?v=1.2.2" in html
     assert "Acesse sua conta" in html
     assert "Sistema TST" not in html
     assert "Acesso seguro" not in html
@@ -117,6 +117,9 @@ def test_navegacao_nao_carrega_historico_inteiro_do_usuario(app):
         cliente = app.test_client()
         with cliente.session_transaction() as sessao:
             sessao["_user_id"] = usuario_id
+            with app.app_context():
+                usuario = db.session.get(Usuario, usuario_id)
+                sessao["_password_fingerprint"] = usuario.senha_hash[-24:]
         resposta = cliente.get("/empresas/")
     finally:
         event.remove(engine, "before_cursor_execute", contar_consulta)

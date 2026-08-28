@@ -66,6 +66,7 @@ def login_user(usuario, remember=False):
         return False
     session["_user_id"] = usuario.get_id()
     session["_remember"] = bool(remember)
+    session["_password_fingerprint"] = usuario.senha_hash[-24:]
     session.permanent = True
     g.usuario_atual = usuario
     return True
@@ -74,6 +75,7 @@ def login_user(usuario, remember=False):
 def logout_user():
     session.pop("_user_id", None)
     session.pop("_remember", None)
+    session.pop("_password_fingerprint", None)
     g.usuario_atual = _anonimo
 
 

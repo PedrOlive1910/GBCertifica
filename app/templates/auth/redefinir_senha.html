@@ -1,1 +1,25 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Nova senha | GBcertifica</title><link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}"></head><body class="login-page"><main class="recovery-layout"><section class="login-card recovery-card"><div class="login-card-head"><span class="mobile-login-mark">GB</span><span class="eyebrow">Link verificado</span><h2>Crie uma nova senha</h2><p>Use pelo menos 8 caracteres e não compartilhe a senha com outras pessoas.</p></div><form method="post" novalidate>{{ form.hidden_tag() }}<div class="field">{{ form.senha.label }}<div class="password-field">{{ form.senha(id='senhaNova', autocomplete='new-password', class_='input-error' if form.senha.errors else '') }}<button type="button" class="password-toggle" data-password-toggle="senhaNova">Mostrar</button></div>{% for erro in form.senha.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div><div class="field">{{ form.confirmar_senha.label }}{{ form.confirmar_senha(autocomplete='new-password', class_='input-error' if form.confirmar_senha.errors else '') }}{% for erro in form.confirmar_senha.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>{{ form.submit(class_='button login-submit') }}</form></section></main><script src="{{ url_for('static', filename='js/app.js') }}"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nova senha | GBcertifica</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css', v=versao_sistema) }}">
+</head>
+<body class="login-page login-page-simple">
+<main class="recovery-layout">
+    <section class="simple-login-card recovery-card">
+        <div class="simple-login-brand"><span class="brand-mark">GB</span><div><strong>GBcertifica</strong><small>Gestão documental ocupacional</small></div></div>
+        <div class="login-card-head"><h1>Crie sua senha pessoal</h1><p>A senha informada pelo administrador é temporária. Defina uma nova senha para continuar.</p></div>
+        <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="field">{{ form.senha.label }}<div class="password-field">{{ form.senha(id='senhaNova', autocomplete='new-password', placeholder='Mínimo de 8 caracteres', class_='input-error' if form.senha.errors else '') }}<button type="button" class="password-toggle" data-password-toggle="senhaNova">Mostrar</button></div>{% for erro in form.senha.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>
+            <div class="field">{{ form.confirmar_senha.label }}{{ form.confirmar_senha(autocomplete='new-password', placeholder='Repita a nova senha', class_='input-error' if form.confirmar_senha.errors else '') }}{% for erro in form.confirmar_senha.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>
+            {{ form.submit(class_='button login-submit', value='Salvar nova senha') }}
+        </form>
+    </section>
+    <footer class="login-version">GBcertifica <span>•</span> Versão {{ versao_sistema }}</footer>
+</main>
+<script src="{{ url_for('static', filename='js/app.js', v=versao_sistema) }}"></script>
+</body>
+</html>

@@ -11,7 +11,7 @@ from app.services.auditoria import alteracoes_campos, registrar_auditoria
 from app.security import current_user
 
 from . import bp
-from .forms import StatusUsuarioForm, UsuarioForm
+from .forms import RedefinirSenhaUsuarioForm, StatusUsuarioForm, UsuarioForm
 
 
 ITENS_POR_PAGINA = 15
@@ -30,6 +30,8 @@ ACOES = (
     "SOLICITOU_REDEFINICAO",
     "REDEFINIU_SENHA",
     "ERRO_EMAIL",
+    "ADMIN_REDEFINIU_SENHA",
+    "TROCOU_SENHA_TEMPORARIA",
 )
 
 
@@ -95,6 +97,7 @@ def novo_usuario():
                 email=form.email.data,
                 nivel_acesso=form.nivel_acesso.data,
                 ativo=form.ativo.data,
+                deve_trocar_senha=True,
             )
             usuario.definir_senha(form.senha.data)
             db.session.add(usuario)
@@ -149,6 +152,7 @@ def editar_usuario(usuario_id):
             senha_alterada = bool(form.senha.data)
             if senha_alterada:
                 usuario.definir_senha(form.senha.data)
+                usuario.deve_trocar_senha = True
             depois = {
                 "nome": usuario.nome,
                 "email": usuario.email,
@@ -211,6 +215,38 @@ def alterar_status_usuario(usuario_id):
     db.session.commit()
     flash("Status do usuário atualizado.", "success")
     return redirect(url_for("admin.usuarios"))
+
+
+@bp.route("/usuarios/<string:usuario_id>/redefinir-senha", methods=["GET", "POST"])
+@somente_admin
+def redefinir_senha_usuario(usuario_id):
+    usuario = _usuario_do_tenant_ou_404(usuario_id)
+    form = RedefinirSenhaUsuarioForm()
+    if form.validate_on_submit():
+        usuario.definir_senha(form.senha.data)
+        usuario.deve_trocar_senha = True
+        usuario.tentativas_falhas = 0
+        usuario.bloqueado_ate = None
+        for token in usuario.tokens_redefinicao:
+            if token.usado_em is None:
+                token.usado_em = token.expira_em
+        registrar_auditoria(
+            "ADMIN_REDEFINIU_SENHA",
+            "Usuários",
+            f"Senha temporária definida para {usuario.nome}.",
+            entidade_tipo="Usuario",
+            entidade_id=usuario.id,
+            detalhes={"troca_obrigatoria": True},
+        )
+        db.session.commit()
+        flash(
+            "Senha temporária definida. O usuário deverá alterá-la no próximo acesso.",
+            "success",
+        )
+        return redirect(url_for("admin.usuarios"))
+    return render_template(
+        "admin/redefinir_senha_usuario.html", form=form, usuario=usuario
+    )
 
 
 @bp.get("/auditoria")

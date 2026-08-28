@@ -1860,6 +1860,65 @@ td {
     }
 }
 
+/* Garantia final de contraste das ações — versão 1.2.2. */
+.button,
+.button-secondary,
+.button-success,
+.button-danger,
+.profile-dropdown .logout-button {
+    border-color: var(--green-700);
+    color: #fff;
+    background: linear-gradient(180deg, var(--green-600), var(--green-700));
+}
+
+.button:hover,
+.button-secondary:hover,
+.button-success:hover,
+.button-danger:hover,
+.profile-dropdown .logout-button:hover {
+    border-color: var(--green-800);
+    color: #fff;
+    background: var(--green-800);
+}
+
+/* GBcertifica 1.2.2: ações consistentes em todas as telas. */
+.button,
+.button-secondary,
+.button-success,
+.button-danger,
+.profile-dropdown .logout-button {
+    border-color: var(--green-700);
+    color: #fff;
+    background: linear-gradient(180deg, var(--green-600), var(--green-700));
+}
+
+.button:hover,
+.button-secondary:hover,
+.button-success:hover,
+.button-danger:hover,
+.profile-dropdown .logout-button:hover {
+    border-color: var(--green-800);
+    color: #fff;
+    background: var(--green-800);
+}
+
+.password-reset-panel { max-width: 820px; }
+.security-note,
+.recovery-instruction {
+    display: grid;
+    gap: 5px;
+    margin-bottom: 24px;
+    border: 1px solid #cfe8da;
+    border-radius: 12px;
+    padding: 16px;
+    color: var(--green-900);
+    background: var(--green-50);
+}
+.security-note span,
+.recovery-instruction span { color: var(--muted); line-height: 1.55; }
+.recovery-admin-icon { margin: 24px 0 12px; font-size: 34px; }
+.admin-recovery-card { text-align: left; }
+
 /* ========================================================================== */
 /* Interface profissional e responsiva - GBcertifica                         */
 /* ========================================================================== */
@@ -3248,4 +3307,25 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
     .error-shell { border-radius: 17px; padding: 32px 20px; }
     .processing-card { padding: 24px 18px; }
     .processing-steps { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Última camada para impedir variações claras ou vermelhas em ações. */
+.button,
+.button-secondary,
+.button-success,
+.button-danger,
+.profile-dropdown .logout-button {
+    border-color: var(--green-700);
+    color: #fff;
+    background: linear-gradient(180deg, var(--green-600), var(--green-700));
+}
+
+.button:hover,
+.button-secondary:hover,
+.button-success:hover,
+.button-danger:hover,
+.profile-dropdown .logout-button:hover {
+    border-color: var(--green-800);
+    color: #fff;
+    background: var(--green-800);
 }

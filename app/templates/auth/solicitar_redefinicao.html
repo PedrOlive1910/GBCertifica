@@ -1,1 +1,27 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Recuperar senha | GBcertifica</title><link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}"></head><body class="login-page"><main class="recovery-layout"><section class="login-card recovery-card"><a class="back-link" href="{{ url_for('auth.login') }}">← Voltar ao login</a><div class="login-card-head"><span class="mobile-login-mark">GB</span><span class="eyebrow">Recuperação de acesso</span><h2>Redefinir senha</h2><p>Informe seu e-mail. Se ele estiver cadastrado, você receberá um link de uso único válido por 1 hora.</p></div><form method="post" novalidate>{{ form.hidden_tag() }}<div class="field">{{ form.email.label }}{{ form.email(placeholder='nome@empresa.com.br', autocomplete='email', autofocus=true, class_='input-error' if form.email.errors else '') }}{% for erro in form.email.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>{{ form.submit(class_='button login-submit') }}</form><small class="login-security">Por segurança, o sistema nunca informa se um endereço está ou não cadastrado.</small></section></main></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Recuperar acesso | GBcertifica</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css', v=versao_sistema) }}">
+</head>
+<body class="login-page login-page-simple">
+    <main class="recovery-layout">
+        <section class="simple-login-card recovery-card admin-recovery-card">
+            <div class="simple-login-brand"><span class="brand-mark">GB</span><div><strong>GBcertifica</strong><small>Gestão documental ocupacional</small></div></div>
+            <div class="recovery-admin-icon" aria-hidden="true">🔐</div>
+            <div class="login-card-head">
+                <h1>Recuperação de acesso</h1>
+                <p>Para proteger os dados da sua empresa, a redefinição de senha é realizada pelo administrador do sistema.</p>
+            </div>
+            <div class="recovery-instruction">
+                <strong>Como recuperar seu acesso</strong>
+                <span>Entre em contato com o administrador responsável pela sua conta. Você receberá uma senha temporária e deverá criar uma nova senha no próximo acesso.</span>
+            </div>
+            <a class="button login-submit" href="{{ url_for('auth.login') }}">Voltar ao login</a>
+        </section>
+        <footer class="login-version">GBcertifica <span>•</span> Versão {{ versao_sistema }}</footer>
+    </main>
+</body>
+</html>

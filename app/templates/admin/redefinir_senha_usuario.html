@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Redefinir senha | GBcertifica{% endblock %}
+{% block content %}
+<section class="page-header"><span class="eyebrow">Administração</span><h1>Redefinir senha</h1><p>Crie uma senha temporária para {{ usuario.nome }}.</p></section>
+<section class="panel form-panel password-reset-panel">
+    <div class="security-note"><strong>Proteção aplicada</strong><span>As sessões anteriores serão encerradas e o usuário deverá criar uma senha pessoal no próximo acesso.</span></div>
+    <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="form-grid">
+            <div class="field">{{ form.senha.label }}<div class="password-field">{{ form.senha(id='senhaTemporaria', placeholder='Mínimo de 8 caracteres', autocomplete='new-password', class_='input-error' if form.senha.errors else '') }}<button class="password-toggle" type="button" data-password-toggle="senhaTemporaria">Mostrar</button></div>{% for erro in form.senha.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>
+            <div class="field">{{ form.confirmar_senha.label }}{{ form.confirmar_senha(placeholder='Repita a senha temporária', autocomplete='new-password', class_='input-error' if form.confirmar_senha.errors else '') }}{% for erro in form.confirmar_senha.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>
+        </div>
+        <div class="form-actions"><a class="button button-secondary" href="{{ url_for('admin.usuarios') }}">Cancelar</a>{{ form.submit(class_='button') }}</div>
+    </form>
+</section>
+{% endblock %}

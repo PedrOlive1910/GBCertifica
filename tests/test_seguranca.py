@@ -1,5 +1,3 @@
-import re
-
 from sqlalchemy import select
 
 from app.extensions import db
@@ -150,30 +148,40 @@ def test_bloqueia_conta_apos_tentativas_repetidas(app, client):
         assert usuario.bloqueado_ate is not None
 
 
-def test_redefinicao_usa_token_unico_de_uma_hora(app, client, monkeypatch):
+def test_recuperacao_publica_orienta_procurar_administrador(app, client):
     criar_usuario(app)
     ativar_login(app)
-    enviado = {}
+    resposta = client.get("/esqueci-a-senha")
+    html = resposta.get_data(as_text=True)
+    assert resposta.status_code == 200
+    assert "administrador do sistema" in html
 
-    def email_falso(destinatario, assunto, texto):
-        enviado.update(destinatario=destinatario, assunto=assunto, texto=texto)
 
-    monkeypatch.setattr("app.auth.routes.enviar_email", email_falso)
-    resposta = client.post(
-        "/esqueci-a-senha",
-        data={"email": "admin@teste.local"},
-        follow_redirects=True,
-    )
-    assert "válido por 1 hora" in resposta.get_data(as_text=True)
-    token = re.search(r"/redefinir-senha/([^\s]+)", enviado["texto"]).group(1)
-    resposta = client.post(
-        f"/redefinir-senha/{token}",
-        data={"senha": "NovaSenha456", "confirmar_senha": "NovaSenha456"},
-        follow_redirects=True,
-    )
-    assert "Senha redefinida com sucesso" in resposta.get_data(as_text=True)
-    assert client.get(f"/redefinir-senha/{token}", follow_redirects=True).status_code == 200
+def test_admin_redefine_e_usuario_e_obrigado_a_trocar_senha(app, client):
+    criar_usuario(app)
+    ativar_login(app)
+    entrar(client)
     with app.app_context():
         usuario = db.session.scalar(select(Usuario))
-        assert usuario.verificar_senha("NovaSenha456")
-        assert not usuario.verificar_senha("SenhaForte123")
+        usuario_id = usuario.id
+    resposta = client.post(
+        f"/administracao/usuarios/{usuario_id}/redefinir-senha",
+        data={
+            "senha": "Temporaria456",
+            "confirmar_senha": "Temporaria456",
+        },
+        follow_redirects=True,
+    )
+    assert "Senha temporária definida" in resposta.get_data(as_text=True)
+    resposta = entrar(client, senha="Temporaria456")
+    assert "Crie sua senha pessoal" in resposta.get_data(as_text=True)
+    resposta = client.post(
+        "/trocar-senha-temporaria",
+        data={"senha": "PessoalNova789", "confirmar_senha": "PessoalNova789"},
+        follow_redirects=True,
+    )
+    assert "Dashboard" in resposta.get_data(as_text=True)
+    with app.app_context():
+        usuario = db.session.get(Usuario, usuario_id)
+        assert usuario.deve_trocar_senha is False
+        assert usuario.verificar_senha("PessoalNova789")

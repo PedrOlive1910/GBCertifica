@@ -1,53 +1,43 @@
 # Atualização para o GBcertifica 1.2.2
 
-Esta atualização corrige desempenho e a apresentação da tela de relatórios.
+## 1. Atualize o projeto
 
-## Antes de iniciar
+Mantenha seu arquivo `.env` fora do Git e substitua os arquivos do sistema pela versão 1.2.2.
 
-Mantenha o arquivo `.env` local. Ele contém dados privados e não deve ser
-adicionado ao GitHub.
-
-Esta versão não altera a estrutura do banco de dados. As tabelas e os dados da
-homologação podem ser preservados.
-
-## Configuração da versão
-
-No `.env`, ajuste somente a versão:
+No `.env`, confirme:
 
 ```env
 APP_VERSION=1.2.2
 ```
 
-Não copie `.env.example` sobre o seu `.env` já configurado.
+## 2. Atualize o banco
 
-## Atualização local
-
-Com o ambiente virtual ativo:
+Esta versão adiciona o controle de troca obrigatória de senha. Com o ambiente virtual ativado, execute uma vez:
 
 ```powershell
-pip install -r requirements.txt
+python criar_banco.py
+```
+
+O comando preserva os dados existentes e adiciona somente a coluna necessária em `usuarios`.
+
+## 3. Inicie a aplicação
+
+```powershell
 python run.py
 ```
 
-## Registro no GitHub
+## 4. Fluxo de recuperação
 
-Depois de conferir a aplicação:
+Em **Administração → Usuários**, clique em **Redefinir senha**, informe uma senha temporária forte e entregue-a ao usuário por um canal privado. No próximo login, o sistema exigirá uma senha pessoal.
+
+## 5. Git
 
 ```powershell
-git status
 git add .
 git commit -m "release: GBcertifica v1.2.2"
-git push origin main
 git tag -a v1.2.2 -m "GBcertifica 1.2.2"
+git push origin main
 git push origin v1.2.2
 ```
 
-O arquivo `.gitignore` deve continuar ignorando `.env`, ambientes virtuais,
-arquivos gerados e dados locais.
-
-## Publicação futura na VPS
-
-Na VPS, mantenha `APP_CONFIG=production`, atualize `APP_VERSION=1.2.2`, instale
-as dependências e reinicie o serviço Gunicorn. O HTTPS deve permanecer ativo no
-Nginx e os arquivos privados não devem ser servidos diretamente pela pasta
-pública.
+Nunca inclua o `.env`, senhas ou chaves SMTP no commit.

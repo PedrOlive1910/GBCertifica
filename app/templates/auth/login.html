@@ -17,7 +17,7 @@
                 {{ form.hidden_tag() }}
                 <div class="field">{{ form.email.label }}{{ form.email(placeholder='nome@empresa.com.br', autocomplete='username', autofocus=true, class_='input-error' if form.email.errors else '') }}{% for erro in form.email.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>
                 <div class="field">{{ form.senha.label }}<div class="password-field">{{ form.senha(id='senha', placeholder='Digite sua senha', autocomplete='current-password', class_='input-error' if form.senha.errors else '') }}<button type="button" class="password-toggle" data-password-toggle="senha">Mostrar</button></div>{% for erro in form.senha.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>
-                <div class="login-options login-options-end"><a href="{{ url_for('auth.solicitar_redefinicao') }}">Recuperar senha</a></div>
+                <div class="login-options login-options-end"><a href="{{ url_for('auth.solicitar_redefinicao') }}">Esqueci minha senha</a></div>
                 {{ form.submit(class_='button login-submit') }}
             </form>
         </section>

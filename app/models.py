@@ -198,6 +198,7 @@ class Usuario(db.Model):
         db.String(20), nullable=False, default=NivelAcesso.CONSULTA, index=True
     )
     ativo = db.Column(db.Boolean, nullable=False, default=True, index=True)
+    deve_trocar_senha = db.Column(db.Boolean, nullable=False, default=False, index=True)
     tentativas_falhas = db.Column(db.Integer, nullable=False, default=0)
     bloqueado_ate = db.Column(db.DateTime(timezone=True), nullable=True)
     ultimo_login_em = db.Column(db.DateTime(timezone=True), nullable=True)

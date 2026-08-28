@@ -1,19 +1,15 @@
 # Histórico de versões
 
-## 1.2.3 — 28/08/2026
-
-- corrigida a sobreposição entre nome da empresa e quantidade no ranking dos relatórios;
-- posição, razão social e total agora ocupam colunas independentes;
-- nomes extensos são limitados com reticências sem quebrar o card;
-- quantidade recebeu indicador visual próprio.
-
 ## 1.2.2 — 28/08/2026
 
-- corrigido o estouro horizontal dos filtros na tela de relatórios;
-- botões dos filtros movidos para uma linha de ações independente;
-- campos de empresa, documento e datas limitados à largura disponível;
-- bloqueada a rolagem horizontal indevida da aplicação;
-- CSS e JavaScript agora recebem a versão na URL para evitar cache antigo após atualizações.
+- recuperação pública por e-mail temporariamente substituída pelo atendimento do administrador;
+- criada uma ação administrativa exclusiva para redefinir senhas;
+- usuários recebem senha temporária e são obrigados a criar uma senha pessoal no próximo login;
+- sessões anteriores são invalidadas automaticamente após a redefinição;
+- redefinições e trocas de senha são registradas na auditoria sem armazenar senhas;
+- botões de ação padronizados em verde com texto branco em todas as telas;
+- tela de orientação para recuperação de acesso reformulada;
+- autenticação, hashing, permissões, CSRF, auditoria e multi-tenant preservados.
 
 ## 1.2.1 — 28/08/2026
 

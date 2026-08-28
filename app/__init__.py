@@ -3,7 +3,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from flask import Flask, current_app, flash, redirect, render_template, request, url_for
+from flask import Flask, current_app, flash, redirect, render_template, request, session, url_for
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from config import configuracoes
@@ -42,6 +42,8 @@ def create_app(config_name=None):
     def carregar_usuario(usuario_id):
         usuario = db.session.get(models.Usuario, usuario_id)
         if not usuario or not usuario.ativo or not usuario.tenant.ativo:
+            return None
+        if session.get("_password_fingerprint") != usuario.senha_hash[-24:]:
             return None
         return usuario
 
@@ -141,6 +143,7 @@ def registrar_seguranca_e_auditoria(app):
         "admin.usuarios": ("Usuários", "Administração de usuários"),
         "admin.novo_usuario": ("Usuários", "Cadastro de usuário"),
         "admin.editar_usuario": ("Usuários", "Edição de usuário"),
+        "admin.redefinir_senha_usuario": ("Usuários", "Redefinição administrativa de senha"),
         "admin.auditoria": ("Auditoria", "Log de auditoria"),
         "admin.detalhe_auditoria": ("Auditoria", "Detalhes do log"),
     }
@@ -150,8 +153,19 @@ def registrar_seguranca_e_auditoria(app):
         if app.config.get("LOGIN_DISABLED"):
             return None
         endpoint = request.endpoint or ""
-        publico = endpoint.startswith("auth.") or endpoint == "main.health"
+        publico = endpoint in {
+            "auth.login",
+            "auth.solicitar_redefinicao",
+            "auth.redefinir_senha",
+            "auth.logout",
+        } or endpoint == "main.health"
         if endpoint == "static" or publico or current_user.is_authenticated:
+            if (
+                current_user.is_authenticated
+                and current_user.deve_trocar_senha
+                and endpoint not in {"auth.trocar_senha_temporaria", "auth.logout", "static"}
+            ):
+                return redirect(url_for("auth.trocar_senha_temporaria"))
             return None
         return login_manager.unauthorized()
 

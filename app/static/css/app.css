@@ -24,6 +24,7 @@
 body {
     margin: 0;
     min-height: 100vh;
+    overflow-x: hidden;
     font-family: "Segoe UI", Arial, sans-serif;
     color: var(--text);
     background: var(--background);
@@ -97,6 +98,7 @@ a {
 
 .content-area {
     min-width: 0;
+    max-width: 100%;
 }
 
 .topbar {
@@ -1866,6 +1868,16 @@ td {
     display: none !important;
 }
 
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
 .topbar-actions,
 .topbar-actions .user-menu {
     display: flex;
@@ -2332,13 +2344,31 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
 
 .report-filter-grid {
     display: grid;
-    grid-template-columns: minmax(210px, 1.2fr) minmax(190px, 1fr) minmax(145px, 0.7fr) minmax(145px, 0.7fr) auto;
+    grid-template-columns: minmax(210px, 1.25fr) minmax(185px, 1fr) repeat(2, minmax(150px, 0.8fr));
     align-items: end;
     gap: 12px;
 }
 
+.report-filter-grid > .field {
+    min-width: 0;
+}
+
+.report-filter-grid input,
+.report-filter-grid select {
+    min-width: 0;
+    max-width: 100%;
+}
+
 .report-filter-grid .filter-actions {
     flex-wrap: nowrap;
+}
+
+.report-filter-actions {
+    display: grid;
+    grid-template-columns: minmax(112px, 1fr) minmax(82px, auto);
+    grid-column: 1 / -1;
+    justify-self: end;
+    width: min(320px, 100%);
 }
 
 .report-filter-grid .button {
@@ -2379,7 +2409,13 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
 }
 
 .company-ranking { gap: 11px; }
-.company-rank-row > div { margin-bottom: 4px; }
+.company-rank-row > div {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 7px;
+}
 .company-rank-row > div > span {
     display: grid;
     flex: 0 0 auto;
@@ -2400,7 +2436,18 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.company-rank-row > div > b { margin-left: auto; color: var(--green-700); font-size: 12px; }
+.company-rank-row > div > b {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    border-radius: 999px;
+    padding: 3px 7px;
+    color: var(--green-700);
+    background: var(--green-50);
+    font-size: 11px;
+    white-space: nowrap;
+}
 
 .report-results-panel {
     padding-bottom: 0;
@@ -2411,9 +2458,42 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
     padding-right: 2px;
 }
 
+.report-results-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+}
+
 .report-results-panel .table-responsive {
+    width: auto;
     margin-right: -24px;
     margin-left: -24px;
+}
+
+.report-table {
+    min-width: 860px;
+    table-layout: fixed;
+}
+
+.report-table th:nth-child(1),
+.report-table td:nth-child(1) { width: 105px; }
+.report-table th:nth-child(2),
+.report-table td:nth-child(2) { width: 21%; }
+.report-table th:nth-child(3),
+.report-table td:nth-child(3) { width: 25%; }
+.report-table th:nth-child(4),
+.report-table td:nth-child(4) { width: 24%; }
+.report-table th:nth-child(5),
+.report-table td:nth-child(5) { width: 125px; }
+.report-table th:last-child,
+.report-table td:last-child { width: 58px; text-align: center; }
+
+.report-table td:nth-child(2),
+.report-table td:nth-child(3),
+.report-table td:nth-child(4) {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .report-results-panel .pagination {
@@ -3108,7 +3188,7 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
 @media (max-width: 1180px) {
     .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .report-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .report-filter-grid .filter-actions { grid-column: 1 / -1; }
+    .report-filter-grid .filter-actions { width: min(330px, 100%); }
 }
 
 @media (max-width: 980px) {
@@ -3125,6 +3205,9 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
     .report-header { align-items: stretch; flex-direction: column; }
     .dashboard-header .button,
     .report-header .button { width: 100%; }
+    .report-results-heading { align-items: stretch; flex-direction: column; }
+    .report-results-heading .button { width: 100%; text-align: center; }
+    .report-filter-grid { grid-template-columns: 1fr 1fr; }
     .report-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .report-type-grid { grid-template-columns: 1fr; }
     .emission-workflow > span small { display: none; }
@@ -3143,8 +3226,10 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
     .attention-banner { align-items: flex-start; }
     .attention-banner > b { display: none; }
     .report-filter-grid { grid-template-columns: 1fr; }
-    .report-filter-grid .filter-actions { grid-column: 1; display: grid; grid-template-columns: 1fr 1fr; }
+    .report-filter-grid .filter-actions { grid-column: 1; justify-self: stretch; width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
     .report-filter-grid .button { text-align: center; }
+    .report-results-panel .table-responsive { margin-right: -20px; margin-left: -20px; }
+    .report-results-panel .pagination { margin-right: -20px; margin-left: -20px; }
     .filter-heading { align-items: stretch; flex-direction: column; }
     .result-pill { width: fit-content; }
     .professional-form-panel form,

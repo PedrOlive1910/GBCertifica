@@ -14,6 +14,7 @@ from flask import (
     url_for,
 )
 from sqlalchemy import and_, or_, select
+from sqlalchemy.orm import selectinload
 
 from app.auth.permissions import permissao_edicao
 from app.extensions import db
@@ -265,6 +266,7 @@ def listar():
     consulta = (
         select(Emissao)
         .join(Emissao.empresa)
+        .options(selectinload(Emissao.documentos))
         .where(Empresa.tenant_id == tenant_atual_id())
     )
     if empresa_id:

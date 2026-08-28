@@ -15,7 +15,7 @@
         <div class="field"><label for="tipo">Tipo de documento</label><select id="tipo" name="tipo"><option value="">Todos os documentos</option>{% for valor, rotulo in rotulos_documentos.items() %}<option value="{{ valor }}" {{ 'selected' if filtros.tipo == valor else '' }}>{{ rotulo }}</option>{% endfor %}</select></div>
         <div class="field"><label for="data_inicio">Data inicial</label><input id="data_inicio" name="data_inicio" type="date" value="{{ filtros.data_inicio }}"></div>
         <div class="field"><label for="data_fim">Data final</label><input id="data_fim" name="data_fim" type="date" value="{{ filtros.data_fim }}"></div>
-        <div class="filter-actions"><button class="button" type="submit">Aplicar filtros</button><a class="button button-secondary" href="{{ url_for('relatorios.index') }}">Limpar</a></div>
+        <div class="filter-actions report-filter-actions"><button class="button" type="submit">Aplicar filtros</button><a class="button button-secondary" href="{{ url_for('relatorios.index') }}">Limpar</a></div>
     </form>
 </section>
 
@@ -42,9 +42,9 @@
 </section>
 
 <section class="panel report-results-panel">
-    <div class="panel-heading"><div><span class="eyebrow">Detalhamento</span><h2>Documentos encontrados</h2><p>Mostrando até {{ paginacao.per_page }} itens por página.</p></div><button class="button button-secondary button-small" id="exportReportPdfSecondary" type="button" data-url="{{ pdf_url }}">Exportar PDF</button></div>
+    <div class="panel-heading report-results-heading"><div><span class="eyebrow">Detalhamento</span><h2>Documentos encontrados</h2><p>Mostrando até {{ paginacao.per_page }} itens por página.</p></div><button class="button button-secondary button-small" id="exportReportPdfSecondary" type="button" data-url="{{ pdf_url }}">Exportar PDF</button></div>
     {% if documentos %}
-        <div class="table-responsive"><table><thead><tr><th>Data</th><th>Documento</th><th>Empresa</th><th>Funcionário</th><th>Status</th><th></th></tr></thead><tbody>{% for documento in documentos %}<tr><td>{{ documento.data_documento | data_br }}</td><td><strong>{{ documento.titulo }}</strong></td><td>{{ documento.emissao.empresa_snapshot.get('razao_social', '—') }}</td><td>{{ documento.emissao.funcionario_snapshot.get('nome', '—') }}</td><td><span class="badge status-{{ documento.status | lower }}">{{ documento.status | title }}</span></td><td><a class="icon-link" aria-label="Abrir emissão" href="{{ url_for('emissoes.detalhar', emissao_id=documento.emissao_id) }}">→</a></td></tr>{% endfor %}</tbody></table></div>
+        <div class="table-responsive report-table-wrap"><table class="report-table"><thead><tr><th>Data</th><th>Documento</th><th>Empresa</th><th>Funcionário</th><th>Status</th><th><span class="sr-only">Ações</span></th></tr></thead><tbody>{% for documento in documentos %}<tr><td>{{ documento.data_documento | data_br }}</td><td><strong>{{ documento.titulo }}</strong></td><td>{{ documento.emissao.empresa_snapshot.get('razao_social', '—') }}</td><td>{{ documento.emissao.funcionario_snapshot.get('nome', '—') }}</td><td><span class="badge status-{{ documento.status | lower }}">{{ documento.status | title }}</span></td><td><a class="icon-link" aria-label="Abrir emissão" href="{{ url_for('emissoes.detalhar', emissao_id=documento.emissao_id) }}">→</a></td></tr>{% endfor %}</tbody></table></div>
         {% if paginacao.pages > 1 %}<nav class="pagination" aria-label="Paginação do relatório">{% if paginacao.has_prev %}<a href="{{ url_for('relatorios.index', pagina=paginacao.prev_num, empresa_id=filtros.empresa_id, tipo=filtros.tipo, data_inicio=filtros.data_inicio, data_fim=filtros.data_fim) }}">‹</a>{% endif %}{% for numero in paginacao.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}{% if numero %}<a class="{{ 'active' if numero == paginacao.page else '' }}" href="{{ url_for('relatorios.index', pagina=numero, empresa_id=filtros.empresa_id, tipo=filtros.tipo, data_inicio=filtros.data_inicio, data_fim=filtros.data_fim) }}">{{ numero }}</a>{% else %}<span>…</span>{% endif %}{% endfor %}{% if paginacao.has_next %}<a href="{{ url_for('relatorios.index', pagina=paginacao.next_num, empresa_id=filtros.empresa_id, tipo=filtros.tipo, data_inicio=filtros.data_inicio, data_fim=filtros.data_fim) }}">›</a>{% endif %}</nav>{% endif %}
     {% else %}
         <div class="empty-state compact-empty"><span>⌕</span><h3>Nenhum documento encontrado</h3><p>Altere os filtros ou limpe a pesquisa para visualizar o histórico.</p></div>
@@ -56,4 +56,4 @@
 </div>
 {% endblock %}
 
-{% block scripts %}<script src="{{ url_for('static', filename='js/relatorios.js') }}"></script>{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/relatorios.js', v=versao_sistema) }}"></script>{% endblock %}

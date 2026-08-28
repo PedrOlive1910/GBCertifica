@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0b4f38">
     <title>Acessar | GBcertifica</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css', v=versao_sistema) }}">
 </head>
 <body class="login-page login-page-simple">
     <main class="simple-login-layout">
@@ -23,6 +23,6 @@
         </section>
         <footer class="login-version">GBcertifica <span>•</span> Versão {{ versao_sistema }}</footer>
     </main>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js', v=versao_sistema) }}"></script>
 </body>
 </html>

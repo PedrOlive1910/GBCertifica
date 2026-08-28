@@ -171,9 +171,11 @@ class Tenant(db.Model):
         onupdate=agora_utc,
     )
 
-    usuarios = db.relationship("Usuario", back_populates="tenant", lazy="selectin")
-    empresas = db.relationship("Empresa", back_populates="tenant", lazy="selectin")
-    logs = db.relationship("LogAuditoria", back_populates="tenant", lazy="selectin")
+    # Coleções potencialmente grandes são carregadas apenas quando solicitadas.
+    # Evita trazer toda a conta, empresas e auditoria em cada abertura de tela.
+    usuarios = db.relationship("Usuario", back_populates="tenant", lazy="select")
+    empresas = db.relationship("Empresa", back_populates="tenant", lazy="select")
+    logs = db.relationship("LogAuditoria", back_populates="tenant", lazy="select")
 
     def __repr__(self):
         return f"<Tenant {self.nome}>"
@@ -211,13 +213,13 @@ class Usuario(db.Model):
 
     tenant = db.relationship("Tenant", back_populates="usuarios", lazy="joined")
     logs = db.relationship(
-        "LogAuditoria", back_populates="usuario", lazy="selectin", passive_deletes=True
+        "LogAuditoria", back_populates="usuario", lazy="select", passive_deletes=True
     )
     tokens_redefinicao = db.relationship(
         "TokenRedefinicaoSenha",
         back_populates="usuario",
         cascade="all, delete-orphan",
-        lazy="selectin",
+        lazy="select",
     )
 
     @property
@@ -361,14 +363,14 @@ class Empresa(db.Model):
     funcionarios = db.relationship(
         "Funcionario",
         back_populates="empresa",
-        lazy="selectin",
+        lazy="select",
         passive_deletes=True,
     )
     tenant = db.relationship("Tenant", back_populates="empresas", lazy="joined")
     emissoes = db.relationship(
         "Emissao",
         back_populates="empresa",
-        lazy="selectin",
+        lazy="select",
         passive_deletes=True,
     )
 
@@ -420,7 +422,7 @@ class Funcionario(db.Model):
     emissoes = db.relationship(
         "Emissao",
         back_populates="funcionario",
-        lazy="selectin",
+        lazy="select",
         passive_deletes=True,
     )
 
@@ -497,7 +499,7 @@ class Emissao(db.Model):
         "DocumentoEmitido",
         back_populates="emissao",
         cascade="all, delete-orphan",
-        lazy="selectin",
+        lazy="select",
         order_by="DocumentoEmitido.sequencia",
         passive_deletes=True,
     )
@@ -593,7 +595,7 @@ class DocumentoEmitido(db.Model):
         "ArquivoDocumento",
         back_populates="documento",
         cascade="all, delete-orphan",
-        lazy="selectin",
+        lazy="select",
         order_by="ArquivoDocumento.pagina",
         passive_deletes=True,
     )

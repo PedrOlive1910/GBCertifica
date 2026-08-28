@@ -69,17 +69,6 @@ def _base_documentos():
     return select(DocumentoEmitido).join(DocumentoEmitido.emissao).join(Emissao.empresa)
 
 
-def _consulta_agregada(coluna, condicoes):
-    return (
-        select(coluna, func.count(DocumentoEmitido.id))
-        .select_from(DocumentoEmitido)
-        .join(DocumentoEmitido.emissao)
-        .join(Emissao.empresa)
-        .where(*condicoes)
-        .group_by(coluna)
-    )
-
-
 def _parametros_filtros(filtros):
     return {
         "empresa_id": filtros["empresa_id"],
@@ -103,25 +92,24 @@ def index():
     )
     paginacao = db.paginate(consulta, page=pagina, per_page=ITENS_POR_PAGINA, error_out=False)
 
-    total = db.session.scalar(
-        select(func.count(DocumentoEmitido.id))
+    total = paginacao.total
+
+    por_tipo = {item: 0 for item in TipoDocumento.TODOS}
+    por_status = {item: 0 for item in StatusDocumento.TODOS}
+    for tipo_documento, status, quantidade in db.session.execute(
+        select(
+            DocumentoEmitido.tipo_documento,
+            DocumentoEmitido.status,
+            func.count(DocumentoEmitido.id),
+        )
         .select_from(DocumentoEmitido)
         .join(DocumentoEmitido.emissao)
         .join(Emissao.empresa)
         .where(*condicoes)
-    ) or 0
-
-    por_tipo = {item: 0 for item in TipoDocumento.TODOS}
-    for tipo_documento, quantidade in db.session.execute(
-        _consulta_agregada(DocumentoEmitido.tipo_documento, condicoes)
+        .group_by(DocumentoEmitido.tipo_documento, DocumentoEmitido.status)
     ):
-        por_tipo[tipo_documento] = quantidade
-
-    por_status = {item: 0 for item in StatusDocumento.TODOS}
-    for status, quantidade in db.session.execute(
-        _consulta_agregada(DocumentoEmitido.status, condicoes)
-    ):
-        por_status[status] = quantidade
+        por_tipo[tipo_documento] += quantidade
+        por_status[status] += quantidade
 
     consulta_empresas = (
         select(Empresa.razao_social, func.count(DocumentoEmitido.id))

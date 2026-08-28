@@ -1,5 +1,6 @@
 from flask import abort, current_app
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.extensions import db
 from app.models import ArquivoDocumento, DocumentoEmitido, Emissao, Empresa, Funcionario
@@ -38,6 +39,11 @@ def emissao_do_tenant_ou_404(emissao_id: str) -> Emissao:
     return db.first_or_404(
         select(Emissao)
         .join(Emissao.empresa)
+        .options(
+            selectinload(Emissao.documentos).selectinload(
+                DocumentoEmitido.arquivos
+            )
+        )
         .where(
             Emissao.id == emissao_id,
             Empresa.tenant_id == tenant_atual_id(),

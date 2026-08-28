@@ -1,4 +1,4 @@
-# GBcertifica — versão 1.2.3
+# GBcertifica — versão 1.2.1
 
 Sistema Flask para cadastrar empresas e funcionários, montar emissões e gerar
 documentos de Segurança do Trabalho em DOCX, PDF e JPEG.

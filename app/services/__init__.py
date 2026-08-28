@@ -1,1 +1,1 @@
-"""Regras de negócio do Sistema TST."""
+"""Regras de negócio do GBcertifica."""

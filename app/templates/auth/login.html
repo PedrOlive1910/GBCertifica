@@ -4,24 +4,24 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0b4f38">
-    <title>Entrar | Sistema TST</title>
+    <title>Acessar | GBcertifica</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
 <body class="login-page login-page-simple">
     <main class="simple-login-layout">
         <section class="simple-login-card" aria-labelledby="loginTitle">
-            <div class="simple-login-brand"><span class="brand-mark">TST</span><div><strong>Sistema TST</strong><small>Automação de documentos</small></div></div>
-            <div class="login-card-head"><span class="eyebrow">Acesso seguro</span><h1 id="loginTitle">Entrar no sistema</h1><p>Informe suas credenciais para acessar o ambiente.</p></div>
+            <div class="simple-login-brand"><span class="brand-mark">GB</span><div><strong>GBcertifica</strong><small>Gestão documental ocupacional</small></div></div>
+            <div class="login-card-head"><h1 id="loginTitle">Acesse sua conta</h1><p>Centralize empresas, colaboradores e documentos em um único ambiente.</p></div>
             {% with mensagens = get_flashed_messages(with_categories=true) %}{% for categoria, mensagem in mensagens %}<div class="alert alert-{{ categoria }}" role="alert">{{ mensagem }}</div>{% endfor %}{% endwith %}
             <form method="post" novalidate>
                 {{ form.hidden_tag() }}
                 <div class="field">{{ form.email.label }}{{ form.email(placeholder='nome@empresa.com.br', autocomplete='username', autofocus=true, class_='input-error' if form.email.errors else '') }}{% for erro in form.email.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>
                 <div class="field">{{ form.senha.label }}<div class="password-field">{{ form.senha(id='senha', placeholder='Digite sua senha', autocomplete='current-password', class_='input-error' if form.senha.errors else '') }}<button type="button" class="password-toggle" data-password-toggle="senha">Mostrar</button></div>{% for erro in form.senha.errors %}<small class="field-error">{{ erro }}</small>{% endfor %}</div>
-                <div class="login-options"><span class="security-note">Acesso protegido</span><a href="{{ url_for('auth.solicitar_redefinicao') }}">Esqueci minha senha</a></div>
+                <div class="login-options login-options-end"><a href="{{ url_for('auth.solicitar_redefinicao') }}">Recuperar senha</a></div>
                 {{ form.submit(class_='button login-submit') }}
             </form>
         </section>
-        <footer class="login-version">Sistema TST <span>•</span> Versão {{ versao_sistema }}</footer>
+        <footer class="login-version">GBcertifica <span>•</span> Versão {{ versao_sistema }}</footer>
     </main>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>

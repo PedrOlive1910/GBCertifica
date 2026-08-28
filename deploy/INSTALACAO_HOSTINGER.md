@@ -39,7 +39,7 @@ Crie `/opt/sistema_tst/.env` com permissão restrita:
 
 ```env
 APP_CONFIG=production
-APP_VERSION=1.0
+APP_VERSION=1.2.0
 APP_TIMEZONE=America/Sao_Paulo
 SECRET_KEY=gere-uma-chave-longa-e-aleatoria
 DATABASE_URL=postgresql+psycopg://usuario:senha-codificada@localhost:5432/gbcertifica

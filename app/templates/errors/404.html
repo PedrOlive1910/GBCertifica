@@ -1,11 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Página não encontrada | Sistema TST{% endblock %}
+{% block title %}Página não encontrada | GBcertifica{% endblock %}
 
 {% block content %}
-<section class="panel error-page">
-    <h1>404</h1>
-    <p>A página solicitada não foi encontrada.</p>
-    <a class="button" href="{{ url_for('main.dashboard') }}">Voltar ao Dashboard</a>
+<section class="error-shell" aria-labelledby="errorTitle">
+    <div class="error-illustration" aria-hidden="true">
+        <svg viewBox="0 0 64 64"><circle cx="27" cy="27" r="15"/><path d="m38 38 13 13M27 20v14M20 27h14"/></svg>
+    </div>
+    <span class="error-code">404</span>
+    <h1 id="errorTitle">Página não encontrada</h1>
+    <p>O endereço pode ter sido alterado ou não está mais disponível. Retorne à página inicial para continuar.</p>
+    <a class="button button-with-icon" href="{{ url_for('main.dashboard') }}"><span>←</span>Voltar à visão geral</a>
 </section>
 {% endblock %}

@@ -150,12 +150,12 @@ def solicitar_redefinicao():
             link = f"{current_app.config['APP_BASE_URL'].rstrip('/')}{caminho}"
             texto = (
                 f"Olá, {usuario.nome}.\n\n"
-                "Recebemos uma solicitação para redefinir sua senha do Sistema TST.\n"
+                "Recebemos uma solicitação para redefinir sua senha do GBcertifica.\n"
                 f"Use o link abaixo em até 1 hora:\n\n{link}\n\n"
                 "O link é de uso único. Se você não solicitou, ignore este e-mail."
             )
             try:
-                enviar_email(usuario.email, "Redefinição de senha — Sistema TST", texto)
+                enviar_email(usuario.email, "Redefinição de senha — GBcertifica", texto)
             except ErroEnvioEmail as erro:
                 db.session.delete(token)
                 registrar_auditoria(

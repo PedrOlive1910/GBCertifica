@@ -1,3 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Acesso negado | Sistema TST{% endblock %}
-{% block content %}<section class="panel error-page"><span class="error-code">403</span><h1>Acesso não permitido</h1><p>Seu nível de acesso não permite realizar esta operação.</p><a class="button" href="{{ url_for('main.dashboard') }}">Voltar ao Dashboard</a></section>{% endblock %}
+
+{% block title %}Acesso negado | GBcertifica{% endblock %}
+
+{% block content %}
+<section class="error-shell" aria-labelledby="errorTitle">
+    <div class="error-illustration error-illustration-warning" aria-hidden="true">
+        <svg viewBox="0 0 64 64"><path d="M32 6 51 14v15c0 13-8 23-19 29C21 52 13 42 13 29V14l19-8Z"/><path d="M24 31h16M27 31v-6a5 5 0 0 1 10 0v6M27 31v10h10V31"/></svg>
+    </div>
+    <span class="error-code">403</span>
+    <h1 id="errorTitle">Acesso não autorizado</h1>
+    <p>Seu perfil não possui permissão para acessar este recurso. Se necessário, solicite a liberação a um administrador.</p>
+    <a class="button button-with-icon" href="{{ url_for('main.dashboard') }}"><span>←</span>Voltar à visão geral</a>
+</section>
+{% endblock %}

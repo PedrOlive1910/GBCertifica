@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Detalhes da Emissão | Sistema TST{% endblock %}
+{% block title %}Detalhes da Emissão | GBcertifica{% endblock %}
 
 {% block content %}
 <section class="page-header page-header-actions"><div><span class="eyebrow">Emissão</span><h1>{{ emissao.funcionario_snapshot.get('nome') }}</h1><p>{{ emissao.empresa_snapshot.get('razao_social') }} · criada em {{ emissao.criado_em | data_br }}</p></div><span class="badge badge-large status-{{ emissao.status | lower }}">{{ rotulos_status_emissao.get(emissao.status, emissao.status) }}</span></section>
@@ -32,7 +32,7 @@
 
 <div class="processing-overlay" id="generationProgress" role="dialog" aria-modal="true" aria-labelledby="generationProgressTitle" data-autostart="{{ 'true' if emissao.status == 'PROCESSANDO' else 'false' }}" data-status-url="{{ url_for('emissoes.status_geracao', emissao_id=emissao.id) }}" hidden>
     <div class="processing-card generation-processing-card">
-        <span class="processing-mark">TST</span>
+        <span class="processing-mark">GB</span>
         <span class="processing-kicker">Emissão em andamento</span>
         <h2 id="generationProgressTitle">Gerando os documentos</h2>
         <p id="generationProgressText">Preparando os dados da emissão...</p>

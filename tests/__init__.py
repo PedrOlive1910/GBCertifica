@@ -1,1 +1,1 @@
-"""Testes automatizados do Sistema TST."""
+"""Testes automatizados do GBcertifica."""

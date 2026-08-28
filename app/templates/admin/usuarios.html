@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Usuários | Sistema TST{% endblock %}
+{% block title %}Usuários | GBcertifica{% endblock %}
 {% block content %}
 <section class="page-header page-header-actions"><div><span class="eyebrow">Administração</span><h1>Usuários e permissões</h1><p>Controle quem acessa o sistema e quais operações cada pessoa pode realizar.</p></div><a class="button" href="{{ url_for('admin.novo_usuario') }}">+ Novo usuário</a></section>
 <section class="permission-cards"><article><strong>Administrador</strong><span>Acesso completo, usuários e auditoria.</span></article><article><strong>Operador</strong><span>Cadastros, emissões e relatórios.</span></article><article><strong>Consulta</strong><span>Somente visualização e downloads.</span></article></section>

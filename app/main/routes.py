@@ -108,6 +108,6 @@ def dashboard():
 def health():
     return {
         "status": "ok",
-        "aplicacao": "Sistema TST",
+        "aplicacao": "GBcertifica",
         "versao": current_app.config["APP_VERSION"],
     }

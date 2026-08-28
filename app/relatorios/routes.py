@@ -25,7 +25,6 @@ from . import bp
 ITENS_POR_PAGINA = 20
 VERDE_ESCURO = colors.HexColor("#0B4F38")
 VERDE = colors.HexColor("#147A52")
-VERDE_CLARO = colors.HexColor("#EAF6F0")
 CINZA = colors.HexColor("#667085")
 
 
@@ -181,7 +180,7 @@ def _rodape_pdf(canvas, documento):
     canvas.line(14 * mm, 10 * mm, largura - 14 * mm, 10 * mm)
     canvas.setFont("Helvetica", 8)
     canvas.setFillColor(CINZA)
-    canvas.drawString(14 * mm, 6 * mm, f"Sistema TST • Versão {current_app.config['APP_VERSION']}")
+    canvas.drawString(14 * mm, 6 * mm, f"GBcertifica • Versão {current_app.config['APP_VERSION']}")
     canvas.drawRightString(largura - 14 * mm, 6 * mm, f"Página {documento.page}")
     canvas.restoreState()
 
@@ -215,8 +214,8 @@ def exportar_pdf():
         rightMargin=14 * mm,
         topMargin=15 * mm,
         bottomMargin=16 * mm,
-        title="Relatório de documentos TST",
-        author="Sistema TST",
+        title="Relatório de documentos ocupacionais",
+        author="GBcertifica",
     )
     estilos = getSampleStyleSheet()
     titulo = ParagraphStyle(
@@ -271,7 +270,7 @@ def exportar_pdf():
         ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
         ("FONTSIZE", (0, 1), (-1, -1), 7.5),
         ("TEXTCOLOR", (0, 1), (-1, -1), colors.HexColor("#24342D")),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, VERDE_CLARO]),
+        ("BACKGROUND", (0, 1), (-1, -1), colors.white),
         ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#D8E7DF")),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("TOPPADDING", (0, 0), (-1, -1), 6),
@@ -291,6 +290,6 @@ def exportar_pdf():
     )
     return send_file(
         buffer, mimetype="application/pdf", as_attachment=True,
-        download_name=f"relatorio_tst_{agora.strftime('%Y%m%d_%H%M')}.pdf",
+        download_name=f"relatorio_gbcertifica_{agora.strftime('%Y%m%d_%H%M')}.pdf",
         max_age=0,
     )

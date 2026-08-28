@@ -1,4 +1,4 @@
-# Sistema Web de Automação TST — versão 1.0
+# GBcertifica — versão 1.2.0
 
 Sistema Flask para cadastrar empresas e funcionários, montar emissões e gerar
 documentos de Segurança do Trabalho em DOCX, PDF e JPEG.
@@ -85,7 +85,7 @@ Configure pelo menos estas variáveis no `.env`:
 
 ```env
 APP_CONFIG=development
-APP_VERSION=1.0
+APP_VERSION=1.2.0
 APP_TIMEZONE=America/Sao_Paulo
 SECRET_KEY=uma-chave-secreta-longa-e-aleatoria
 DATABASE_URL=postgresql+psycopg://usuario:senha@localhost:5432/gbcertifica_homolog
@@ -118,7 +118,7 @@ LIBREOFFICE_PATH=C:/Program Files/LibreOffice/program/soffice.exe
 PDFTOPPM_PATH=C:/poppler/Library/bin/pdftoppm.exe
 ```
 
-## Atualizar o banco para a versão 1.0
+## Atualizar o banco
 
 Execute:
 
@@ -132,7 +132,7 @@ principal e cria o primeiro administrador a partir do `.env`.
 
 Depois que o administrador for criado, remova `ADMIN_PASSWORD` do `.env`.
 
-As tabelas da versão 1.0 são:
+As tabelas atuais são:
 
 - `tenants`;
 - `usuarios`;

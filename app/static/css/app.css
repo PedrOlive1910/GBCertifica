@@ -979,7 +979,7 @@ tbody tr:hover {
     }
 }
 
-/* Refinamento visual e telas de autenticação/administração — versão 1.0 */
+/* Refinamento visual e telas de autenticação/administração */
 :root {
     --green-950: #073b2a;
     --green-900: #0a4a35;
@@ -1859,7 +1859,7 @@ td {
 }
 
 /* ========================================================================== */
-/* Interface profissional e responsiva - Sistema TST v1.0                    */
+/* Interface profissional e responsiva - GBcertifica                         */
 /* ========================================================================== */
 
 [hidden] {
@@ -2655,8 +2655,8 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
     min-height: 100vh;
     overflow: auto;
     background:
-        radial-gradient(circle at 50% 0%, rgba(20, 122, 82, 0.085), transparent 33%),
-        #f2f6f4;
+        linear-gradient(rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.72)),
+        linear-gradient(135deg, #edf1ef, #f8faf9);
 }
 
 .simple-login-layout {
@@ -2668,19 +2668,31 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
 }
 
 .simple-login-card {
+    position: relative;
+    overflow: hidden;
     width: min(430px, 100%);
-    border: 1px solid #dce8e1;
-    border-radius: 18px;
-    padding: 32px;
+    border: 1px solid #dfe6e2;
+    border-radius: 20px;
+    padding: 36px;
     background: #fff;
-    box-shadow: 0 20px 60px rgba(11, 61, 46, 0.12);
+    box-shadow: 0 24px 70px rgba(23, 34, 29, 0.11);
+}
+
+.simple-login-card::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--green-900), var(--green-500));
+    content: "";
 }
 
 .simple-login-brand {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 28px;
+    margin-bottom: 32px;
 }
 
 .simple-login-brand .brand-mark {
@@ -2691,13 +2703,19 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
 .simple-login-brand strong,
 .simple-login-brand small { display: block; }
 .simple-login-brand strong { color: var(--green-900); font-size: 15px; }
-.simple-login-brand small { margin-top: 2px; color: var(--muted); font-size: 10px; }
+.simple-login-brand small { margin-top: 2px; color: var(--muted); font-size: 11px; }
 
 .simple-login-card .login-card-head h1 {
-    margin: 4px 0 7px;
+    margin: 0 0 8px;
     color: var(--green-950, #073b2a);
-    font-size: 28px;
+    font-size: 30px;
     letter-spacing: -0.035em;
+}
+
+.simple-login-card .login-card-head p {
+    max-width: 340px;
+    font-size: 13px;
+    line-height: 1.6;
 }
 
 .simple-login-card form {
@@ -2723,6 +2741,230 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
 }
 
 .login-version span { margin: 0 5px; color: #b3bdb7; }
+
+.login-options-end {
+    justify-content: flex-end;
+}
+
+/* Cabeçalho, perfil e páginas de erro — versão 1.2.0 */
+.profile-menu {
+    position: relative;
+}
+
+.profile-menu > summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 218px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 5px 7px;
+    list-style: none;
+    cursor: pointer;
+    transition: 0.18s ease;
+}
+
+.profile-menu > summary::-webkit-details-marker {
+    display: none;
+}
+
+.profile-menu > summary:hover,
+.profile-menu[open] > summary {
+    border-color: var(--border);
+    background: #f7faf8;
+}
+
+.profile-chevron {
+    width: 17px;
+    height: 17px;
+    margin-left: auto;
+    fill: none;
+    stroke: #718078;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+    transition: transform 0.18s ease;
+}
+
+.profile-menu[open] .profile-chevron {
+    transform: rotate(180deg);
+}
+
+.profile-dropdown {
+    position: absolute;
+    z-index: 90;
+    top: calc(100% + 11px);
+    right: 0;
+    width: 320px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 14px;
+    background: #fff;
+    box-shadow: 0 22px 55px rgba(7, 59, 42, 0.17);
+}
+
+.profile-dropdown-head {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    border-bottom: 1px solid #edf1ef;
+    padding: 2px 2px 13px;
+}
+
+.profile-dropdown-head div {
+    min-width: 0;
+}
+
+.profile-dropdown-head strong,
+.profile-dropdown-head small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-dropdown-head strong {
+    color: var(--text);
+    font-size: 13px;
+}
+
+.profile-dropdown-head small {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.user-avatar-large {
+    width: 42px;
+    height: 42px;
+}
+
+.profile-metadata {
+    display: grid;
+    gap: 8px;
+    padding: 13px 2px;
+}
+
+.profile-metadata span {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.profile-metadata strong {
+    max-width: 190px;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-dropdown form {
+    margin: 0;
+}
+
+.profile-dropdown .logout-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 40px;
+    border-radius: 10px;
+    color: #9d2f28;
+    background: #fff8f7;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.profile-dropdown .logout-button svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+}
+
+.error-shell {
+    width: min(700px, 100%);
+    margin: clamp(30px, 8vh, 90px) auto;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: clamp(34px, 6vw, 58px);
+    background:
+        radial-gradient(circle at 50% 0%, rgba(34, 160, 107, 0.08), transparent 38%),
+        #fff;
+    box-shadow: 0 18px 55px rgba(7, 59, 42, 0.09);
+    text-align: center;
+}
+
+.error-illustration {
+    display: grid;
+    place-items: center;
+    width: 82px;
+    height: 82px;
+    margin: 0 auto 17px;
+    border: 1px solid #cfe8da;
+    border-radius: 24px;
+    color: var(--green-700);
+    background: linear-gradient(145deg, #f5fcf8, #e8f6ef);
+    transform: rotate(-3deg);
+}
+
+.error-illustration-warning {
+    color: #a76516;
+    border-color: #f3dfbd;
+    background: linear-gradient(145deg, #fffaf0, #fff2d8);
+}
+
+.error-illustration-danger {
+    color: #b42318;
+    border-color: #f2cfcb;
+    background: linear-gradient(145deg, #fff9f8, #feeceb);
+}
+
+.error-illustration svg {
+    width: 48px;
+    height: 48px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.4;
+}
+
+.error-shell .error-code {
+    display: inline-flex;
+    margin-bottom: 9px;
+    border-radius: 999px;
+    padding: 4px 10px;
+    color: var(--green-700);
+    background: var(--green-100);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+}
+
+.error-shell h1 {
+    margin: 0 0 9px;
+    color: var(--green-950);
+    font-size: clamp(27px, 4vw, 36px);
+    letter-spacing: -0.04em;
+}
+
+.error-shell p {
+    max-width: 510px;
+    margin: 0 auto 25px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.65;
+}
 
 /* Progresso de geração */
 .processing-open { overflow: hidden; }
@@ -2915,6 +3157,10 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
     .emission-form .sticky-actions > span { display: grid; grid-template-columns: 1fr 1fr; }
     .emission-form .sticky-actions .button { text-align: center; }
     .simple-login-card { padding: 26px 21px; }
+    .profile-menu > summary { min-width: 0; }
+    .profile-menu > summary .user-info { display: none; }
+    .profile-dropdown { right: -4px; width: min(320px, calc(100vw - 28px)); }
+    .error-shell { border-radius: 17px; padding: 32px 20px; }
     .processing-card { padding: 24px 18px; }
     .processing-steps { grid-template-columns: repeat(2, 1fr); }
 }

@@ -1,11 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Erro interno | Sistema TST{% endblock %}
+{% block title %}Erro interno | GBcertifica{% endblock %}
 
 {% block content %}
-<section class="panel error-page">
-    <h1>Erro interno</h1>
-    <p>Não foi possível concluir a solicitação. Tente novamente.</p>
-    <a class="button" href="{{ url_for('main.dashboard') }}">Voltar ao Dashboard</a>
+<section class="error-shell" aria-labelledby="errorTitle">
+    <div class="error-illustration error-illustration-danger" aria-hidden="true">
+        <svg viewBox="0 0 64 64"><rect x="11" y="13" width="42" height="15" rx="4"/><rect x="11" y="36" width="42" height="15" rx="4"/><path d="M19 20.5h.1M19 43.5h.1M27 20.5h18M27 43.5h18"/></svg>
+    </div>
+    <span class="error-code">500</span>
+    <h1 id="errorTitle">Não foi possível concluir</h1>
+    <p>Encontramos uma instabilidade inesperada. Tente novamente; se o problema persistir, informe o suporte.</p>
+    <a class="button button-with-icon" href="{{ url_for('main.dashboard') }}"><span>↻</span>Retornar à visão geral</a>
 </section>
 {% endblock %}

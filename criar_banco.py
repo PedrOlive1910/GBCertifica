@@ -1,4 +1,4 @@
-"""Cria e atualiza a estrutura necessária para a versão 1.0.
+"""Cria e atualiza a estrutura necessária para o GBcertifica.
 
 O script preserva os cadastros existentes. Em bancos anteriores, adiciona a
 chave de tenant às empresas e vincula os registros à conta principal.
@@ -132,7 +132,7 @@ with app.app_context():
     admin_criado = criar_administrador_inicial(tenant_principal)
 
     tabelas = inspect(db.engine).get_table_names()
-    print(f"Banco atualizado para o Sistema TST v{app.config['APP_VERSION']}.")
+    print(f"Banco atualizado para o GBcertifica v{app.config['APP_VERSION']}.")
     print("Conta cliente:", tenant_principal.nome)
     print("Administrador inicial criado." if admin_criado else "Administrador já existente ou pendente de configuração.")
     print("Tabelas encontradas:", ", ".join(sorted(tabelas)))

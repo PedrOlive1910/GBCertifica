@@ -9,7 +9,7 @@ class LoginForm(FlaskForm):
     email = StringField("E-mail", validators=[DataRequired(), validar_email, Length(max=180)])
     senha = PasswordField("Senha", validators=[DataRequired(), Length(max=128)])
     proximo = HiddenField()
-    submit = SubmitField("Entrar no sistema")
+    submit = SubmitField("Acessar plataforma")
 
 
 class SolicitarRedefinicaoForm(FlaskForm):
